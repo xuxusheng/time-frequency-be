@@ -1,0 +1,23 @@
+Server:
+  RunMode: debug
+  HttpPort: 8080
+  ReadTimeout: 60
+  WriteTime: 60
+App:
+  DefaultPageSize: 10
+  MaxPageSize: 100
+Database:
+  DBType: mysql
+  Username: root
+  Password: asdfasdf
+  Host: home.xuxusheng.com
+  DBName: time-frequency
+  TablePrefix: ""
+  Charset: utf8
+  ParseTime: True
+  MaxIdleConns: 10
+  MaxOpenConns: 30
+JWT:
+  secret: this is a debug JWT secret
+  Issuer: xusheng:20691718@qq.com
+  Expire: 7200

@@ -41,3 +41,12 @@ func main() {
 	log.Println("Server exiting")
 
 }
+
+func init() {
+	setupLogger()
+
+	err := setupSetting()
+	if err != nil {
+		log.Fatalf("init.setupSetting err: %v", err)
+	}
+}
