@@ -65,7 +65,7 @@ func (u User) Delete(db *gorm.DB) error {
 }
 
 // 获取单个用户
-func (u User) Get(db *gorm.DB) error {
+func (u User) Get(db *gorm.DB) (*User, error) {
 	//var user User
 	//if u.ID != 0 {
 	//	db = db.Where("id = ?", u.ID)
@@ -79,6 +79,11 @@ func (u User) Get(db *gorm.DB) error {
 	//err := db.First(&user).Error
 	//return &user, err
 
+	var user User
 	// 此种方式只会针对 u 结构体中非零值字段进行查询
-	return db.Where(&u).First(&u).Error
+	err := db.Where(&u).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }

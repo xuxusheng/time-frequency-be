@@ -24,6 +24,7 @@ func NewRouter() *gin.Engine {
 		user := v1.NewUser()
 		apiv1.POST("/users", user.Create)
 		apiv1.GET("/users", user.List)
+		apiv1.GET("/users/:id", user.Get)
 	}
 
 	return r

@@ -41,9 +41,9 @@ func (d *Dao) GetUser(id uint, name, phone string) (*model.User, error) {
 		Phone: phone,
 	}
 
-	err := user.Get(d.engine)
+	newUser, err := user.Get(d.engine)
 	if err != nil {
 		return nil, err
 	}
-	return &user, nil
+	return newUser, nil
 }

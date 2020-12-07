@@ -8,4 +8,5 @@ var (
 	DeleteUserFail  = NewError(30001003, "删除用户失败")
 	CountUserFail   = NewError(30001004, "统计用户数量失败")
 	GetUserListFail = NewError(30001005, "获取用户列表失败")
+	GetUserFail     = NewError(30001006, "获取用户信息失败")
 )

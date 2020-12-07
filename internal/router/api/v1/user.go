@@ -5,7 +5,9 @@ import (
 	"github.com/xuxusheng/time-frequency-be/global"
 	"github.com/xuxusheng/time-frequency-be/internal/service"
 	"github.com/xuxusheng/time-frequency-be/pkg/app"
+	"github.com/xuxusheng/time-frequency-be/pkg/convert"
 	"github.com/xuxusheng/time-frequency-be/pkg/errcode"
+	"gorm.io/gorm"
 )
 
 type User struct {
@@ -135,4 +137,39 @@ func (u User) Create(c *gin.Context) {
 	}
 
 	resp.ToResponse(nil)
+}
+
+func (u User) Get(c *gin.Context) {
+
+	idStr := c.Param("id")
+	resp := app.NewResponse(c)
+
+	id, err := convert.StrTo(idStr).UInt32()
+	if err != nil {
+		resp.ToErrorResponse(
+			errcode.InvalidParams.WithDetails(
+				"id 格式错误",
+			),
+		)
+		return
+	}
+
+	svc := service.New(c.Request.Context())
+
+	user, err := svc.GetUser(uint(id))
+	if err != nil {
+		global.Logger.Errorf(c, "svc.GetUser err: %v", err)
+		var errResp *errcode.Error
+		if err == gorm.ErrRecordNotFound {
+			errResp = errcode.NotFound.WithDetails("用户不存在")
+		} else {
+			errResp = errcode.GetUserFail.WithDetails(
+				err.Error(),
+			)
+		}
+		resp.ToErrorResponse(errResp)
+		return
+	}
+
+	resp.ToResponse(user)
 }

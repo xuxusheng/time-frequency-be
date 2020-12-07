@@ -32,9 +32,9 @@ func NewDBEngine(databaseSetting *setting.DatabaseSettingS) (*gorm.DB, error) {
 		dbConfig.Logger = logger.New(
 			log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 			logger.Config{
-				SlowThreshold: time.Second,   // Slow SQL threshold
-				LogLevel:      logger.Silent, // Log level
-				Colorful:      true,          // Disable color
+				SlowThreshold: time.Second, // Slow SQL threshold
+				LogLevel:      logger.Info, // Log level
+				Colorful:      true,        // Disable color
 			},
 		)
 	}

@@ -48,6 +48,14 @@ func (svc *Service) CreateUser(param *CreateUserReq) error {
 	)
 }
 
+func (svc *Service) GetUser(id uint) (*model.User, error) {
+	user, err := svc.dao.GetUser(id, "", "")
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
 // 用来判断用户名和手机号是否已被占用
 func (svc *Service) IsUserExist(name, phone string) (bool, error) {
 	_, err := svc.dao.GetUser(0, name, phone)
