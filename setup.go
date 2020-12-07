@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/xuxusheng/time-frequency-be/global"
+	"github.com/xuxusheng/time-frequency-be/internal/model"
 	"github.com/xuxusheng/time-frequency-be/pkg/logger"
 	"github.com/xuxusheng/time-frequency-be/pkg/setting"
 	"log"
@@ -93,4 +94,14 @@ func setupSetting() error {
 
 	return nil
 
+}
+
+// 准备数据库连接
+func setupDBEngine() error {
+	var err error
+	global.DBEngine, err = model.NewDBEngine(global.DatabaseSetting)
+	if err != nil {
+		return err
+	}
+	return nil
 }

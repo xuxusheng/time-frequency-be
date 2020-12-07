@@ -8,9 +8,9 @@ App:
   MaxPageSize: 100
 Database:
   DBType: mysql
-  Username: root
-  Password: asdfasdf
-  Host: home.xuxusheng.com
+  Username: time-frequency
+  Password: time-frequency
+  Host: home.xuxusheng.com:31395
   DBName: time-frequency
   TablePrefix: ""
   Charset: utf8
