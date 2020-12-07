@@ -23,7 +23,7 @@ func (u User) Count(db *gorm.DB) (int64, error) {
 	err := db.
 		Model(&u).
 		Where("name LIKE ?", "%"+u.Name+"%").
-		Or("phone LIKE ?", "%"+u.Phone+"%").Count(&count).Error
+		Where("phone LIKE ?", "%"+u.Phone+"%").Count(&count).Error
 	if err != nil {
 		return 0, err
 	}
@@ -37,7 +37,11 @@ func (u User) List(db *gorm.DB, pageOffset, pageSize int) ([]*User, error) {
 		db = db.Offset(pageOffset).Limit(pageSize)
 	}
 
-	err := db.Where("name LIKE ?", "%"+u.Name+"%").Or("phone LIKE ?", "%"+u.Phone+"%").Find(&users).Error
+	err := db.
+		Where("name LIKE ?", "%"+u.Name+"%").
+		Where("phone LIKE ?", "%"+u.Phone+"%").
+		Find(&users).
+		Error
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +59,26 @@ func (u User) Update(db *gorm.DB, values interface{}) error {
 }
 
 // 删除用户
-func (u User) delete(db *gorm.DB) error {
+func (u User) Delete(db *gorm.DB) error {
 	// 硬删除
 	return db.Unscoped().Delete(&u).Error
+}
+
+// 获取单个用户
+func (u User) Get(db *gorm.DB) error {
+	//var user User
+	//if u.ID != 0 {
+	//	db = db.Where("id = ?", u.ID)
+	//}
+	//if u.Name != "" {
+	//	db = db.Where("name = ?", u.Name)
+	//}
+	//if u.Phone != "" {
+	//	db = db.Where("phone = ?", u.Phone)
+	//}
+	//err := db.First(&user).Error
+	//return &user, err
+
+	// 此种方式只会针对 u 结构体中非零值字段进行查询
+	return db.Where(&u).First(&u).Error
 }
