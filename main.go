@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"github.com/gin-gonic/gin"
+	"github.com/xuxusheng/time-frequency-be/internal/router"
 	"log"
 	"net/http"
 	"os"
@@ -13,11 +13,9 @@ import (
 
 func main() {
 
-	engine := gin.Default()
-
 	s := &http.Server{
 		Addr:           ":8080",
-		Handler:        engine,
+		Handler:        router.NewRouter(),
 		MaxHeaderBytes: 1 << 20,
 	}
 
