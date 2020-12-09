@@ -17,56 +17,20 @@ func NewUser() User {
 	return User{}
 }
 
-func (u User) List(c *gin.Context) {
-	param := service.UserListReq{}
+/*type CreateUserReq struct {
+	Name     string `form:"name" binding:"min=2,max=3"`
+	Phone    string `form:"phone" binding:"min=1"`
+	Password string `form:"password"`
+}*/
 
-	resp := app.NewResponse(c)
-
-	// 这里的 errs 类型不是 errcode 包中定义的 Error，而是 app 包中定义的 ValidError
-	valid, errs := app.BindAndValid(c, &param)
-	if !valid {
-		// 参数校验失败
-		global.Logger.Errorf(c, "app.BindAndValid errs: %v", errs)
-		resp.ToErrorResponse(
-			errcode.InvalidParams.WithDetails(
-				errs.Errors()...,
-			),
-		)
-		return
-	}
-
-	svc := service.New(c.Request.Context())
-	pageInfo := app.PageInfo{
-		Pn: app.GetPn(c),
-		Ps: app.GetPs(c),
-	}
-	total, err := svc.CountUser(&service.CountUserReq{
-		Name:  param.Name,
-		Phone: param.Phone,
-	})
-	if err != nil {
-		global.Logger.Errorf(c, "svc.CountTag err: %v", err)
-		resp.ToErrorResponse(
-			errcode.CountUserFail.WithDetails(err.Error()),
-		)
-		return
-	}
-
-	users, err := svc.GetUserList(&param, &pageInfo)
-	if err != nil {
-		global.Logger.Errorf(c, "svc.GetUserList err: %v", err)
-		resp.ToErrorResponse(
-			errcode.GetUserListFail.WithDetails(err.Error()),
-		)
-		return
-	}
-
-	resp.ToResponseList(users, total)
-	return
+type CreateUserReq struct {
+	Name     string `form:"name" binding:"min=1"`
+	Phone    string `form:"phone"`
+	Password string `form:"password"`
 }
 
 func (u User) Create(c *gin.Context) {
-	param := service.CreateUserReq{}
+	param := CreateUserReq{}
 	resp := app.NewResponse(c)
 
 	// 校验参数
@@ -74,102 +38,142 @@ func (u User) Create(c *gin.Context) {
 	if !valid {
 		// 参数校验失败
 		global.Logger.Errorf(c, "app.BindAndValid errs: %v", errs)
-		resp.ToErrorResponse(
-			errcode.InvalidParams.WithDetails(
-				errs.Errors()...,
-			),
-		)
+		resp.ToErrorResponse(errcode.InvalidParams.WithDetails(errs.Errors()...))
 		return
 	}
 
-	svc := service.New(c.Request.Context())
+	userSvc := service.NewUserService(c.Request.Context())
 
-	// todo 判断用户名和手机号是否重复
-	isExit, err := svc.IsUserExist(param.Name, "")
+	// service 返回的 err，已经是自定义的 errcode.Error 类型了
+	_, err := userSvc.Create(param.Name, param.Phone, param.Password)
 	if err != nil {
-		// 查询用户名是否被占用失败
-		global.Logger.Error(c, "svc.IsUserExist err: %v", err)
-		resp.ToErrorResponse(
-			errcode.CreateUserFail.WithDetails(
-				err.Error(),
-			),
-		)
-		return
-	}
-	if isExit {
-		resp.ToErrorResponse(
-			errcode.CreateUserFail.WithDetails(
-				"用户名已被占用",
-			),
-		)
-		return
-	}
-
-	isExit, err = svc.IsUserExist("", param.Phone)
-	if err != nil {
-		// 查询用户名是否被占用失败
-		global.Logger.Error(c, "svc.IsUserExist err: %v", err)
-		resp.ToErrorResponse(
-			errcode.CreateUserFail.WithDetails(
-				err.Error(),
-			),
-		)
-		return
-	}
-	if isExit {
-		resp.ToErrorResponse(
-			errcode.CreateUserFail.WithDetails(
-				"手机号已被占用",
-			),
-		)
-		return
-	}
-
-	err = svc.CreateUser(&param)
-	if err != nil {
-		global.Logger.Error(c, "svc.CreateUser err: %v", err)
-		resp.ToErrorResponse(
-			errcode.CreateUserFail.WithDetails(
-				err.Error(),
-			),
-		)
+		global.Logger.Error(c, "userSvc.Create err: %v", err)
+		resp.ToErrorResponse(err)
 		return
 	}
 
 	resp.ToResponse(nil)
 }
 
-func (u User) Get(c *gin.Context) {
-
-	idStr := c.Param("id")
+func (u User) Delete(c *gin.Context) {
 	resp := app.NewResponse(c)
 
-	id, err := convert.StrTo(idStr).UInt32()
+	// 检查 id 格式
+	id, err := convert.StrTo(c.Param("id")).UInt()
+	if err != nil {
+		resp.ToErrorResponse(errcode.InvalidParams.WithMsg("id 格式错误"))
+		return
+	}
+
+	userSvc := service.NewUserService(c.Request.Context())
+
+	// 执行删除
+	err = userSvc.Delete(id)
+	if err != nil {
+		resp.ToErrorResponse(errcode.DeleteUserFail.WithDetails(err.Error()))
+		return
+	}
+
+	resp.ToResponse(nil)
+	return
+}
+
+type UpdateUserReq struct {
+	ID    string `form:"id" binding:""`
+	Name  string `form:"name"`
+	Phone string `form:"phone"`
+}
+
+func (u User) Update(c *gin.Context) {
+	param := UpdateUserReq{}
+	resp := app.NewResponse(c)
+
+	// 检查 id 格式
+	id, err := convert.StrTo(c.Param("id")).UInt()
+	if err != nil {
+		resp.ToErrorResponse(errcode.InvalidParams.WithMsg("id 格式错误"))
+		return
+	}
+
+	// 校验参数
+	valid, errs := app.BindAndValid(c, &param)
+	if !valid {
+		// 参数校验失败
+		global.Logger.Errorf(c, "app.BindAndValid errs: %v", errs)
+		resp.ToErrorResponse(errcode.InvalidParams.WithDetails(errs.Errors()...))
+		return
+	}
+
+	userSvc := service.NewUserService(c.Request.Context())
+
+	if err := userSvc.Update(id, param.Name, param.Phone); err != nil {
+		resp.ToErrorResponse(err)
+		return
+	}
+
+	resp.ToResponse(nil)
+}
+
+type UserListReq struct {
+	Name  string `form:"id" binding:""`
+	Phone string `form:"phone" binding:""`
+	Pn    string `form:"pn"`
+	Ps    string `form:"ps"`
+}
+
+func (u User) List(c *gin.Context) {
+	resp := app.NewResponse(c)
+	param := UserListReq{}
+
+	// 这里的 errs 类型不是 errcode 包中定义的 Error，而是 app 包中定义的 ValidError
+	valid, errs := app.BindAndValid(c, &param)
+	if !valid {
+		// 参数校验失败
+		global.Logger.Errorf(c, "app.BindAndValid errs: %v", errs)
+		resp.ToErrorResponse(
+			errcode.InvalidParams.WithDetails(errs.Errors()...),
+		)
+		return
+	}
+
+	pn := app.GetPn(c)
+	ps := app.GetPs(c)
+	userSvc := service.NewUserService(c.Request.Context())
+
+	users, count, err := userSvc.List(param.Phone, param.Name, pn, ps)
+	if err != nil {
+		resp.ToErrorResponse(errcode.GetUserListFail.WithDetails(err.Error()))
+		return
+	}
+	resp.ToResponseList(users, count)
+}
+
+func (u User) Get(c *gin.Context) {
+
+	resp := app.NewResponse(c)
+	idStr := c.Param("id")
+
+	id, err := convert.StrTo(idStr).UInt()
 	if err != nil {
 		resp.ToErrorResponse(
-			errcode.InvalidParams.WithDetails(
+			errcode.InvalidParams.WithMsg(
 				"id 格式错误",
 			),
 		)
 		return
 	}
 
-	svc := service.New(c.Request.Context())
+	userSvc := service.NewUserService(c.Request.Context())
 
-	user, err := svc.GetUser(uint(id))
+	user, err := userSvc.Get(id)
 	if err != nil {
-		global.Logger.Errorf(c, "svc.GetUser err: %v", err)
-		var errResp *errcode.Error
 		if err == gorm.ErrRecordNotFound {
-			errResp = errcode.NotFound.WithDetails("用户不存在")
-		} else {
-			errResp = errcode.GetUserFail.WithDetails(
-				err.Error(),
-			)
+			resp.ToErrorResponse(errcode.NotFound.WithMsg("用户不存在"))
+			return
 		}
-		resp.ToErrorResponse(errResp)
+		resp.ToErrorResponse(errcode.GetUserFail.WithDetails(err.Error()))
 		return
 	}
-
 	resp.ToResponse(user)
+	return
 }

@@ -56,5 +56,7 @@ func (s *Setting) ReloadAllSection() error {
 			return err
 		}
 	}
+
+	// todo 重载完之后，需要把几个时间单位重设一下，可以封一个函数
 	return nil
 }

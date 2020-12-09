@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
+	"github.com/xuxusheng/time-frequency-be/global"
 	"strings"
 )
 
@@ -34,9 +35,8 @@ func BindAndValid(c *gin.Context, v interface{}) (bool, ValidErrors) {
 	var errs ValidErrors
 	err := c.ShouldBind(v)
 	if err != nil {
-		// 从上下文中取出当前的语言是什么
-		v := c.Value("trans")
-		trans, _ := v.(ut.Translator)
+		// 从 ctx 中取出翻译器
+		trans, _ := c.Value("trans").(ut.Translator)
 
 		// 将 ShouldBind 返回的 err 推断为 ValidationErrors，gin 默认使用的是 validator 这个库来做校验
 		verrs, ok := err.(validator.ValidationErrors)
@@ -45,14 +45,28 @@ func BindAndValid(c *gin.Context, v interface{}) (bool, ValidErrors) {
 			return false, errs
 		}
 
-		// verrs.Translate(trans) 返回的 ValidationErrorsTranslations 是一个 map[string]string 结构
-		for key, value := range verrs.Translate(trans) {
-			// 拿到 key、value 后，转化为自己定义的 ValidError 类型
+		/*		// verrs.Translate(trans) 返回的 ValidationErrorsTranslations 是一个 map[string]string 结构
+				for key, value := range verrs.Translate(trans) {
+					// 拿到 key、value 后，转化为自己定义的 ValidError 类型
+					errs = append(errs, &ValidError{
+						Key:     key,
+						Message: value, // 错误信息
+					})
+				}*/
+
+		m := verrs.Translate(trans)
+		global.Logger.Debugf(c, "m: %+v", m)
+
+		for _, e := range verrs {
+			//msg := e.Value().(string)
+
 			errs = append(errs, &ValidError{
-				Key:     key,
-				Message: value,
+				Key:     e.Error(),
+				Message: e.Translate(trans),
 			})
+
 		}
+
 		return false, errs
 	}
 

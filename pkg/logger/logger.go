@@ -89,10 +89,20 @@ func (l *Logger) WithTrace() *Logger {
 	ginCtx, ok := l.ctx.(*gin.Context)
 	// 判断一下是不是 gin.Context，如果不是的话，不一定有 gin 框架提供的方法， 跳过这一步，直接原样返回
 	if ok {
-		return l.WithFields(Fields{
-			"trace_id": ginCtx.MustGet("X-Trace-ID"),
-			"span_id":  ginCtx.MustGet("X-Span-ID"),
-		})
+
+		fields := Fields{}
+
+		if traceID, ok := ginCtx.Get("X-Trace-ID"); ok {
+			fields["X-Trace-ID"] = traceID
+		}
+
+		if spanID, ok := ginCtx.Get("X-Span-ID"); ok {
+			fields["X-Span-ID"] = spanID
+		}
+
+		if len(fields) > 0 {
+			return l.WithFields(fields)
+		}
 	}
 	return l
 }
@@ -106,11 +116,9 @@ func (l *Logger) WithCaller(skip int) *Logger {
 	pc, file, line, ok := runtime.Caller(skip)
 	if ok {
 		f := runtime.FuncForPC(pc)
-		ll.callers = []string{
-			// 文件名：行号 函数名
-			fmt.Sprintf("%s:%d %s", file, line, f.Name()),
-		}
+		ll.callers = []string{fmt.Sprintf("%s: %d %s", file, line, f.Name())}
 	}
+
 	return ll
 }
 
@@ -122,7 +130,6 @@ func (l *Logger) WithCallerFrames() *Logger {
 	pcs := make([]uintptr, maxCallerDepth)
 	depth := runtime.Callers(minCallerDepth, pcs)
 	frames := runtime.CallersFrames(pcs[:depth])
-	// todo 这个 for 循环里的 more 判断，怎么感觉代码有问题
 	for frame, more := frames.Next(); more; frame, more = frames.Next() {
 		s := fmt.Sprintf("%s:%d %s", frame.File, frame.Line, frame.Function)
 		callers = append(callers, s)
@@ -158,8 +165,8 @@ func (l *Logger) JSONFormat(level Level, message string) map[string]interface{} 
 }
 
 func (l *Logger) Output(level Level, message string) {
-	// 先转化为一个待打印的 map，然后转为 json 字符串
-	body, _ := json.Marshal(l.JSONFormat(level, message))
+	ll := l.WithCaller(3)
+	body, _ := json.Marshal(ll.JSONFormat(level, message))
 	content := string(body)
 
 	switch level {
@@ -170,11 +177,11 @@ func (l *Logger) Output(level Level, message string) {
 	case LevelWarn:
 		fallthrough
 	case LevelError:
-		l.newLogger.Println(content)
+		ll.newLogger.Println(content)
 	case LevelFatal:
-		l.newLogger.Fatal(content)
+		ll.newLogger.Fatal(content)
 	case LevelPanic:
-		l.newLogger.Panic(content)
+		ll.newLogger.Panic(content)
 	}
 }
 

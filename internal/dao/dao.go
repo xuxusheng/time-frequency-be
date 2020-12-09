@@ -4,10 +4,5 @@ import "gorm.io/gorm"
 
 type Dao struct {
 	engine *gorm.DB
-}
-
-func New(engine *gorm.DB) *Dao {
-	return &Dao{
-		engine: engine,
-	}
+	// 如果需要的话，可以把 gin.Context 也挂进来
 }
