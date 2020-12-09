@@ -11,6 +11,7 @@ type UserDao struct {
 }
 
 func NewUserDao(engine *gorm.DB) *UserDao {
+	// todo 如果 dao 层中，一个 dao 只允许操作单表，那么在 new 的时候，要不要直接把 engine = engine.Model(&model.User{}) 这样固化住？
 	return &UserDao{
 		Dao{
 			engine: engine,
@@ -35,7 +36,8 @@ func (u *UserDao) Create(name, phone, password string) (*model.User, error) {
 
 // 删除用户，硬删除
 func (u *UserDao) Delete(id uint) error {
-	return u.engine.Delete(&model.User{}, id).Error
+	// 硬删除
+	return u.engine.Unscoped().Delete(&model.User{}, id).Error
 }
 
 // 更新用户信息，注意零值也会被更新
@@ -57,6 +59,7 @@ func (u *UserDao) Get(id uint) (*model.User, error) {
 func (u *UserDao) Count(name, phone string) (int64, error) {
 	var count int64
 	err := u.engine.
+		Model(&model.User{}).
 		Where("name LIKE ?", "%"+name+"%").
 		Where("phone LIKE ?", "%"+phone+"%").
 		Count(&count).
@@ -91,9 +94,15 @@ func (u *UserDao) List(name, phone string, pn, ps int) ([]*model.User, error) {
 }
 
 // 用户名是否被占用
-func (u *UserDao) IsNameExist(name string) (bool, error) {
+func (u *UserDao) IsNameExist(name string, excludeID uint) (bool, error) {
 	var count int64
-	err := u.engine.Where(model.User{Name: name}).Count(&count).Error
+	db := u.engine.Model(&model.User{})
+
+	if excludeID != 0 {
+		db = db.Where("id != ?", excludeID)
+	}
+
+	err := db.Where(model.User{Name: name}).Count(&count).Error
 	if err != nil {
 		return false, err
 	}
@@ -102,12 +111,31 @@ func (u *UserDao) IsNameExist(name string) (bool, error) {
 }
 
 // 手机号是否被占用
-func (u *UserDao) IsPhoneExist(phone string) (bool, error) {
+func (u *UserDao) IsPhoneExist(phone string, excludeID uint) (bool, error) {
 	var count int64
-	err := u.engine.Where(model.User{Phone: phone}).Count(&count).Error
+	db := u.engine.Model(&model.User{})
+
+	if excludeID != 0 {
+		db = db.Where("id != ?", excludeID)
+	}
+
+	err := db.Where(model.User{Phone: phone}).Count(&count).Error
 	if err != nil {
 		return false, err
 	}
 	// 数量不为 0 说明存在
+	return count != 0, nil
+}
+
+func (u *UserDao) IsIDExist(id uint) (bool, error) {
+	var count int64
+	err := u.engine.
+		Model(&model.User{}).
+		Where(model.User{Model: model.Model{ID: id}}).
+		Count(&count).
+		Error
+	if err != nil {
+		return false, err
+	}
 	return count != 0, nil
 }

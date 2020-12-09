@@ -2,12 +2,11 @@ package service
 
 import (
 	"context"
-	"github.com/gin-gonic/gin"
 	"github.com/xuxusheng/time-frequency-be/global"
 	"github.com/xuxusheng/time-frequency-be/internal/dao"
 	"github.com/xuxusheng/time-frequency-be/internal/model"
+	"github.com/xuxusheng/time-frequency-be/pkg/app"
 	"github.com/xuxusheng/time-frequency-be/pkg/errcode"
-	"gorm.io/gorm"
 )
 
 type UserService struct {
@@ -26,7 +25,7 @@ func (u *UserService) Create(name, phone, password string) (*model.User, *errcod
 	userDao := dao.NewUserDao(global.DBEngine)
 
 	// 检查用户名
-	isExist, err := userDao.IsNameExist(name)
+	isExist, err := userDao.IsNameExist(name, 0)
 	if err != nil {
 		return nil, errcode.CreateUserFail.WithDetails(err.Error())
 	}
@@ -35,7 +34,7 @@ func (u *UserService) Create(name, phone, password string) (*model.User, *errcod
 	}
 
 	// 检查手机号
-	isExist, err = userDao.IsPhoneExist(phone)
+	isExist, err = userDao.IsPhoneExist(phone, 0)
 	if err != nil {
 		return nil, errcode.CreateUserFail.WithDetails(err.Error())
 	}
@@ -43,8 +42,14 @@ func (u *UserService) Create(name, phone, password string) (*model.User, *errcod
 		return nil, errcode.CreateUserFailPhoneExist
 	}
 
+	// 密码算 hash
+	hash, err := app.EncodePWD(password)
+	if err != nil {
+		return nil, errcode.CreateUserFail.WithDetails(err.Error())
+	}
+
 	// 检查无误，开始写入
-	user, err := userDao.Create(name, phone, password)
+	user, err := userDao.Create(name, phone, hash)
 	if err != nil {
 		return nil, errcode.CreateUserFail.WithDetails(err.Error())
 	}
@@ -52,9 +57,23 @@ func (u *UserService) Create(name, phone, password string) (*model.User, *errcod
 	return user, nil
 }
 
-func (u *UserService) Delete(id uint) error {
+func (u *UserService) Delete(id uint) *errcode.Error {
 	userDao := dao.NewUserDao(global.DBEngine)
-	return userDao.Delete(id)
+
+	// 判断用户是否存在
+	isExist, err := userDao.IsIDExist(id)
+	if err != nil {
+		return errcode.DeleteUserFail.WithDetails(err.Error())
+	}
+	if !isExist {
+		return errcode.NotFound.WithMsg("用户不存在")
+	}
+
+	// 执行删除
+	if err := userDao.Delete(id); err != nil {
+		return errcode.DeleteUserFail.WithDetails(err.Error())
+	}
+	return nil
 }
 
 // 更新用户基本信息，在 server 外层，就应该先校验好 name 和 phone 不同时为空字符串
@@ -63,7 +82,7 @@ func (u *UserService) Update(id uint, name, phone string) *errcode.Error {
 
 	if name != "" {
 		// 检查用户名
-		isExist, err := userDao.IsNameExist(name)
+		isExist, err := userDao.IsNameExist(name, id)
 		if err != nil {
 			return errcode.UpdateUserFail.WithDetails(err.Error())
 		}
@@ -74,7 +93,7 @@ func (u *UserService) Update(id uint, name, phone string) *errcode.Error {
 
 	if phone != "" {
 		// 检查手机号
-		isExist, err := userDao.IsNameExist(name)
+		isExist, err := userDao.IsPhoneExist(phone, id)
 		if err != nil {
 			return errcode.UpdateUserFail.WithDetails(err.Error())
 		}
@@ -83,14 +102,20 @@ func (u *UserService) Update(id uint, name, phone string) *errcode.Error {
 		}
 	}
 
-	err := userDao.Update(id, gin.H{
+	// 判断用户是否存在
+	isExist, err := userDao.IsIDExist(id)
+	if err != nil {
+		return errcode.UpdateUserFail.WithDetails(err.Error())
+	}
+	if !isExist {
+		return errcode.NotFound.WithMsg("用户不存在")
+	}
+
+	err = userDao.Update(id, map[string]interface{}{
 		"name":  name,
 		"phone": phone,
 	})
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return errcode.NotFound.WithMsg("用户不存在")
-		}
 		return errcode.UpdateUserFail.WithDetails(err.Error())
 	}
 	return nil

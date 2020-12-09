@@ -2,11 +2,10 @@ package model
 
 import (
 	"github.com/xuxusheng/time-frequency-be/global"
-	"gorm.io/gorm"
 )
 
 type User struct {
-	gorm.Model
+	Model
 	Name     string `json:"name" gorm:"not null;unique"`         // 用户名（唯一、非空）
 	Phone    string `json:"phone" gorm:"not null;unique"`        // 手机号（唯一、非空）
 	Role     string `json:"role" gorm:"not null;default:member"` // 用户角色，admin & member（非空、默认 member）

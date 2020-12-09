@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/xuxusheng/time-frequency-be/global"
 	"github.com/xuxusheng/time-frequency-be/internal/service"
@@ -17,18 +18,13 @@ func NewUser() User {
 	return User{}
 }
 
-/*type CreateUserReq struct {
-	Name     string `form:"name" binding:"min=2,max=3"`
-	Phone    string `form:"phone" binding:"min=1"`
-	Password string `form:"password"`
-}*/
-
 type CreateUserReq struct {
-	Name     string `form:"name" binding:"min=1"`
-	Phone    string `form:"phone"`
-	Password string `form:"password"`
+	Name     string `form:"name" binding:"required,min=4,max=20"`
+	Phone    string `form:"phone" binding:"required"`
+	Password string `form:"password" binding:"required,min=4"`
 }
 
+// todo，加入一个角色字段，添加时允许选择是 admin 还是 member
 func (u User) Create(c *gin.Context) {
 	param := CreateUserReq{}
 	resp := app.NewResponse(c)
@@ -68,20 +64,17 @@ func (u User) Delete(c *gin.Context) {
 	userSvc := service.NewUserService(c.Request.Context())
 
 	// 执行删除
-	err = userSvc.Delete(id)
-	if err != nil {
-		resp.ToErrorResponse(errcode.DeleteUserFail.WithDetails(err.Error()))
+	if err := userSvc.Delete(id); err != nil {
+		resp.ToErrorResponse(err)
 		return
 	}
-
 	resp.ToResponse(nil)
 	return
 }
 
 type UpdateUserReq struct {
-	ID    string `form:"id" binding:""`
-	Name  string `form:"name"`
-	Phone string `form:"phone"`
+	Name  string `form:"name" binding:"required,min=4,max=20"`
+	Phone string `form:"phone" binding:"required"`
 }
 
 func (u User) Update(c *gin.Context) {
@@ -167,7 +160,7 @@ func (u User) Get(c *gin.Context) {
 
 	user, err := userSvc.Get(id)
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			resp.ToErrorResponse(errcode.NotFound.WithMsg("用户不存在"))
 			return
 		}
