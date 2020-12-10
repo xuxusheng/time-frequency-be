@@ -15,6 +15,10 @@ func NewRouter() *gin.Engine {
 	r := gin.New()
 
 	r.Use(gin.Recovery())
+
+	// swagger 文档
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	if global.ServerSetting.RunMode == gin.DebugMode {
 		r.Use(gin.Logger())
 	}
@@ -28,8 +32,6 @@ func NewRouter() *gin.Engine {
 			"ping": "pong",
 		})
 	})
-
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// 业务接口
 	apiv1 := r.Group("/api/v1")

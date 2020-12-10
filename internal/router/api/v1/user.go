@@ -141,7 +141,7 @@ func (u User) Update(c *gin.Context) {
 }
 
 type UserListReq struct {
-	Name  string `form:"id" binding:""`
+	Name  string `form:"name" binding:""`
 	Phone string `form:"phone" binding:""`
 	Pn    string `form:"pn"`
 	Ps    string `form:"ps"`
@@ -178,7 +178,7 @@ func (u User) List(c *gin.Context) {
 	ps := app.GetPs(c)
 	userSvc := service.NewUserService(c.Request.Context())
 
-	users, count, err := userSvc.List(param.Phone, param.Name, pn, ps)
+	users, count, err := userSvc.List(param.Name, param.Phone, pn, ps)
 	if err != nil {
 		resp.ToErrorResponse(errcode.GetUserListFail.WithDetails(err.Error()))
 		return
