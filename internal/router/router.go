@@ -19,8 +19,9 @@ func NewRouter() *gin.Engine {
 		r.Use(gin.Logger())
 	}
 
-	r.Use(middleware.AccessLog())
+	r.Use(middleware.RequestID())
 	r.Use(middleware.Translations())
+	r.Use(middleware.AccessLog())
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
