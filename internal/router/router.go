@@ -2,6 +2,9 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	_ "github.com/xuxusheng/time-frequency-be/docs"
 	"github.com/xuxusheng/time-frequency-be/internal/middleware"
 	v1 "github.com/xuxusheng/time-frequency-be/internal/router/api/v1"
 	"net/http"
@@ -19,6 +22,8 @@ func NewRouter() *gin.Engine {
 			"ping": "pong",
 		})
 	})
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// 业务接口
 	apiv1 := r.Group("/api/v1")

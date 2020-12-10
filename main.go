@@ -17,6 +17,13 @@ import (
 	"time"
 )
 
+// @title 时频学习平台
+// @version 1.0
+// @description 时频学习平台后端接口文档
+
+// @contact.name xusheng
+// @contact.url https://github.com/xuxusheng
+// @contact.email 20691718@qq.com
 func main() {
 
 	s := &http.Server{

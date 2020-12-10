@@ -14,10 +14,9 @@ import (
 )
 
 type Model struct {
-	ID        uint           `json:"id" gorm:"primarykey"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `json:"deleted_at"`
+	ID        uint      `json:"id" gorm:"primarykey" example:"1"`                   // 唯一主键
+	CreatedAt time.Time `json:"created_at" example:"2020-12-09T18:52:41.555+08:00"` // 记录创建时间
+	UpdatedAt time.Time `json:"updated_at" example:"2020-12-09T18:52:41.555+08:00"` // 记录最后更新时间
 }
 
 // 新建数据库连接
