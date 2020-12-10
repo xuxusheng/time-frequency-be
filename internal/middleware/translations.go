@@ -10,7 +10,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	enTranslations "github.com/go-playground/validator/v10/translations/en"
 	zhTranslations "github.com/go-playground/validator/v10/translations/zh"
-	"github.com/xuxusheng/time-frequency-be/global"
 )
 
 // 国际化中间件
@@ -27,13 +26,10 @@ func Translations() gin.HandlerFunc {
 		if ok {
 			switch locale {
 			case "zh":
-				global.Logger.Debug(c, 1)
 				_ = zhTranslations.RegisterDefaultTranslations(v, trans)
 			case "en":
-				global.Logger.Debug(c, 2)
 				_ = enTranslations.RegisterDefaultTranslations(v, trans)
 			default:
-				global.Logger.Debug(c, 3)
 				_ = zhTranslations.RegisterDefaultTranslations(v, trans)
 			}
 			c.Set("trans", trans)

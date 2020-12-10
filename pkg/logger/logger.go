@@ -116,7 +116,7 @@ func (l *Logger) WithCaller(skip int) *Logger {
 	pc, file, line, ok := runtime.Caller(skip)
 	if ok {
 		f := runtime.FuncForPC(pc)
-		ll.callers = []string{fmt.Sprintf("%s: %d %s", file, line, f.Name())}
+		ll.callers = []string{fmt.Sprintf("%s:%d %s", file, line, f.Name())}
 	}
 
 	return ll

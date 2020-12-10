@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"github.com/gin-gonic/gin"
 	"github.com/xuxusheng/time-frequency-be/global"
 	"github.com/xuxusheng/time-frequency-be/internal/model"
 	"github.com/xuxusheng/time-frequency-be/internal/router"
@@ -25,10 +26,12 @@ import (
 // @contact.url https://github.com/xuxusheng
 // @contact.email 20691718@qq.com
 func main() {
-
+	gin.SetMode(global.ServerSetting.RunMode)
 	s := &http.Server{
-		Addr:           ":8080",
+		Addr:           ":" + global.ServerSetting.HttpPort,
 		Handler:        router.NewRouter(),
+		ReadTimeout:    global.ServerSetting.ReadTimeout,
+		WriteTimeout:   global.ServerSetting.WriteTimeout,
 		MaxHeaderBytes: 1 << 20,
 	}
 
@@ -71,7 +74,7 @@ func init() {
 
 // 准备 Logger
 func setupLogger() {
-	global.Logger = logger.NewLogger(os.Stdout, "", log.LstdFlags).WithCaller(2)
+	global.Logger = logger.NewLogger(os.Stdout, "", log.LstdFlags)
 }
 
 // 准备全局的配置

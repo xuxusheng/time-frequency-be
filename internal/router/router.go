@@ -5,6 +5,7 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	_ "github.com/xuxusheng/time-frequency-be/docs"
+	"github.com/xuxusheng/time-frequency-be/global"
 	"github.com/xuxusheng/time-frequency-be/internal/middleware"
 	v1 "github.com/xuxusheng/time-frequency-be/internal/router/api/v1"
 	"net/http"
@@ -13,8 +14,12 @@ import (
 func NewRouter() *gin.Engine {
 	r := gin.New()
 
-	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
+	if global.ServerSetting.RunMode == gin.DebugMode {
+		r.Use(gin.Logger())
+	}
+
+	r.Use(middleware.AccessLog())
 	r.Use(middleware.Translations())
 
 	r.GET("/ping", func(c *gin.Context) {
