@@ -31,7 +31,7 @@ type CreateUserReq struct {
 // @Accept json
 // @Produce json
 // @Tags user
-// @Param name body string true "用户名（6-20位数字或字母构成" minlength(6) maxlength(20)
+// @Param name body string true "用户名（6-20位数字或字母构成)" minlength(6) maxlength(20)
 // @Param phone body string true "手机号（十一位数字）" minlength(11) maxlength(11)
 // @Param password body string true "密码"
 // @Success 200 {object} model.Resp{data=model.DWithP{data=model.User}}
