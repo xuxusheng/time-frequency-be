@@ -3,7 +3,11 @@ WORKDIR /project
 COPY . /project
 ENV GOPROXY=https://goproxy.io,direct
 ENV CGO_ENABLED=0
-RUN go build -o /go/bin/app /project/main.go
+RUN go get -u && \
+    go get -u github.com/swaggo/swag/cmd/swag && \
+    rm -rf ./docs && \
+    swag init && \
+    go build -o /go/bin/app /project/main.go
 
 # ------ 分界线 ------
 
