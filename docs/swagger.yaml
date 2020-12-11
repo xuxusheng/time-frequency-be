@@ -101,12 +101,12 @@ paths:
       - application/json
       description: 通过 name、phone 字段查询匹配的用户，支持模糊查询、分页
       parameters:
-      - default: '""'
+      - default: ""
         description: 用户名
         in: query
         name: name
         type: string
-      - default: '""'
+      - default: ""
         description: 手机号
         in: query
         name: phone

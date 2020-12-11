@@ -44,14 +44,14 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "default": "\"\"",
+                        "default": "",
                         "description": "用户名",
                         "name": "name",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "default": "\"\"",
+                        "default": "",
                         "description": "手机号",
                         "name": "phone",
                         "in": "query"
