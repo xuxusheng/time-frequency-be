@@ -3,9 +3,9 @@ on:
   push:
     branches:
       - develop
-  pull_request:
-    branches:
-      - develop
+#  pull_request:
+#    branches:
+#      - develop
 env:
   # 仓库名称
   PROJECT_NAME: ${{ github.event.repository.name }}
