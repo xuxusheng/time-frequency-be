@@ -1,24 +1,29 @@
-FROM golang as builder
+FROM golang AS builder
+
+ENV CGO_ENABLED 0
+ENV GOOS linux
+ENV GOPROXY https://goproxy.io,direct
+
 WORKDIR /project
+
+COPY go.mod go.sum /project/
+RUN go mod download
 COPY . /project
-ENV GOPROXY=https://goproxy.io,direct
-ENV CGO_ENABLED=0
-RUN go get -u && \
-    go get -u github.com/swaggo/swag/cmd/swag && \
+RUN go get -u github.com/swaggo/swag/cmd/swag && \
     rm -rf ./docs && \
     swag init && \
     go build -o /go/bin/app /project/main.go
 
 # ------ 分界线 ------
 
-FROM centos:8
+FROM alpine
 
 # 替换系统镜像源为阿里云
-RUN curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
 
 # 设置时区
-RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-ENV TZ=Asia/Shanghai
+RUN apk update --no-cache && apk add --no-cache ca-certificates tzdata
+ENV TZ Asia/Shanghai
 
 WORKDIR /project
 COPY --from=builder /go/bin/app /project/app
