@@ -7,7 +7,7 @@ RUN go build -o /go/bin/app /project/main.go
 
 # ------ 分界线 ------
 
-FROM centos:7
+FROM centos:8
 
 # 替换系统镜像源为阿里云
 RUN curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
