@@ -16,6 +16,14 @@ func NewRouter() *gin.Engine {
 
 	r.Use(gin.Recovery())
 
+	// 健康检查
+	r.GET("/liveness", func(c *gin.Context) {
+		c.AbortWithStatus(http.StatusNoContent)
+	}).GET("/readiness", func(c *gin.Context) {
+		// todo 优化一下， initial 函数执行完成，server 成功启动之后，再返回 2xx
+		c.AbortWithStatus(http.StatusNoContent)
+	})
+
 	// swagger 文档
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
