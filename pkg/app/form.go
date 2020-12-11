@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
-	"github.com/xuxusheng/time-frequency-be/global"
 	"strings"
 )
 
@@ -45,30 +44,15 @@ func BindAndValid(c *gin.Context, v interface{}) (bool, ValidErrors) {
 			return false, errs
 		}
 
-		/*		// verrs.Translate(trans) 返回的 ValidationErrorsTranslations 是一个 map[string]string 结构
-				for key, value := range verrs.Translate(trans) {
-					// 拿到 key、value 后，转化为自己定义的 ValidError 类型
-					errs = append(errs, &ValidError{
-						Key:     key,
-						Message: value, // 错误信息
-					})
-				}*/
-
-		m := verrs.Translate(trans)
-		global.Logger.Debugf(c, "m: %+v", m)
-
-		for _, e := range verrs {
-			//msg := e.Value().(string)
-
+		// verrs.Translate(trans) 返回的 ValidationErrorsTranslations 是一个 map[string]string 结构
+		for key, value := range verrs.Translate(trans) {
+			// 拿到 key、value 后，转化为自己定义的 ValidError 类型
 			errs = append(errs, &ValidError{
-				Key:     e.Error(),
-				Message: e.Translate(trans),
+				Key:     key,
+				Message: value, // 错误信息
 			})
-
 		}
-
 		return false, errs
 	}
-
 	return true, nil
 }
