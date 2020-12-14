@@ -22,11 +22,3 @@ func GetPs(c *gin.Context) int {
 	}
 	return ps
 }
-
-func GetPageOffset(pn, ps int) int {
-	result := 0
-	if pn > 0 {
-		result = (pn - 1) * ps
-	}
-	return result
-}

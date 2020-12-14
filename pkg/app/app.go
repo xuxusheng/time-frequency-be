@@ -6,12 +6,6 @@ import (
 	"net/http"
 )
 
-type PageInfo struct {
-	Pn    int `json:"pn"`
-	Ps    int `json:"ps"`
-	Total int `json:"total"`
-}
-
 type Response struct {
 	Ctx *gin.Context
 }
@@ -22,7 +16,7 @@ func NewResponse(ctx *gin.Context) *Response {
 	}
 }
 
-func (r *Response) ToResponse(data interface{}) {
+func (r *Response) Success(data interface{}) {
 	if data == nil {
 		data = gin.H{}
 	}
@@ -32,7 +26,7 @@ func (r *Response) ToResponse(data interface{}) {
 	})
 }
 
-func (r *Response) ToResponseList(list interface{}, total int64) {
+func (r *Response) SuccessList(list interface{}, total int64) {
 	r.Ctx.JSON(http.StatusOK, gin.H{
 		"meta": errcode.Success.Meta(),
 		"data": gin.H{
@@ -44,7 +38,7 @@ func (r *Response) ToResponseList(list interface{}, total int64) {
 	})
 }
 
-func (r *Response) ToErrorResponse(err *errcode.Error) {
+func (r *Response) Error(err *errcode.Error) {
 	r.Ctx.JSON(err.StatusCode(), gin.H{
 		"meta": err.Meta(),
 		"data": gin.H{},

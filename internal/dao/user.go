@@ -2,7 +2,6 @@ package dao
 
 import (
 	"github.com/xuxusheng/time-frequency-be/internal/model"
-	"github.com/xuxusheng/time-frequency-be/pkg/app"
 	"gorm.io/gorm"
 )
 
@@ -71,14 +70,14 @@ func (u *UserDao) Count(name, phone string) (int64, error) {
 }
 
 // 通过 name、phone 模糊查询多个用户列表
-func (u *UserDao) List(name, phone string, pn, ps int) ([]*model.User, error) {
+func (u *UserDao) List(name, phone string, page *model.Page) ([]*model.User, error) {
 	db := u.engine
 	var users []*model.User
 
 	// 设置偏移量
-	offset := app.GetPageOffset(pn, ps)
-	if offset >= 0 && ps > 0 {
-		db = db.Offset(offset).Limit(ps)
+	offset := page.GetOffset()
+	if offset >= 0 && page.Ps > 0 {
+		db = db.Offset(offset).Limit(page.Ps)
 	}
 
 	// 查询

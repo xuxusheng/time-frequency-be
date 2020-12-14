@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/xuxusheng/time-frequency-be/global"
+	"github.com/xuxusheng/time-frequency-be/internal/model"
 	"github.com/xuxusheng/time-frequency-be/internal/service"
 	"github.com/xuxusheng/time-frequency-be/pkg/app"
 	"github.com/xuxusheng/time-frequency-be/pkg/convert"
@@ -46,7 +47,7 @@ func (u User) Create(c *gin.Context) {
 	if !valid {
 		// 参数校验失败
 		global.Logger.Errorf(c, "app.BindAndValid errs: %v", errs)
-		resp.ToErrorResponse(errcode.InvalidParams.WithDetails(errs.Errors()...))
+		resp.Error(errcode.InvalidParams.WithDetails(errs.Errors()...))
 		return
 	}
 
@@ -56,11 +57,11 @@ func (u User) Create(c *gin.Context) {
 	_, err := userSvc.Create(param.Name, param.Phone, param.Password)
 	if err != nil {
 		global.Logger.Error(c, "userSvc.Create err: %v", err)
-		resp.ToErrorResponse(err)
+		resp.Error(err)
 		return
 	}
 
-	resp.ToResponse(nil)
+	resp.Success(nil)
 }
 
 // 删除用户 godoc
@@ -78,7 +79,7 @@ func (u User) Delete(c *gin.Context) {
 	// 检查 id 格式
 	id, err := convert.StrTo(c.Param("id")).UInt()
 	if err != nil {
-		resp.ToErrorResponse(errcode.InvalidParams.WithMsg("id 格式错误"))
+		resp.Error(errcode.InvalidParams.WithMsg("id 格式错误"))
 		return
 	}
 
@@ -86,10 +87,10 @@ func (u User) Delete(c *gin.Context) {
 
 	// 执行删除
 	if err := userSvc.Delete(id); err != nil {
-		resp.ToErrorResponse(err)
+		resp.Error(err)
 		return
 	}
-	resp.ToResponse(nil)
+	resp.Success(nil)
 	return
 }
 
@@ -117,7 +118,7 @@ func (u User) Update(c *gin.Context) {
 	// 检查 id 格式
 	id, err := convert.StrTo(c.Param("id")).UInt()
 	if err != nil {
-		resp.ToErrorResponse(errcode.InvalidParams.WithMsg("id 格式错误"))
+		resp.Error(errcode.InvalidParams.WithMsg("id 格式错误"))
 		return
 	}
 
@@ -126,18 +127,18 @@ func (u User) Update(c *gin.Context) {
 	if !valid {
 		// 参数校验失败
 		global.Logger.Errorf(c, "app.BindAndValid errs: %v", errs)
-		resp.ToErrorResponse(errcode.InvalidParams.WithDetails(errs.Errors()...))
+		resp.Error(errcode.InvalidParams.WithDetails(errs.Errors()...))
 		return
 	}
 
 	userSvc := service.NewUserService(c.Request.Context())
 
 	if err := userSvc.Update(id, param.Name, param.Phone); err != nil {
-		resp.ToErrorResponse(err)
+		resp.Error(err)
 		return
 	}
 
-	resp.ToResponse(nil)
+	resp.Success(nil)
 }
 
 type UserListReq struct {
@@ -168,7 +169,7 @@ func (u User) List(c *gin.Context) {
 	if !valid {
 		// 参数校验失败
 		global.Logger.Errorf(c, "app.BindAndValid errs: %v", errs)
-		resp.ToErrorResponse(
+		resp.Error(
 			errcode.InvalidParams.WithDetails(errs.Errors()...),
 		)
 		return
@@ -178,12 +179,12 @@ func (u User) List(c *gin.Context) {
 	ps := app.GetPs(c)
 	userSvc := service.NewUserService(c.Request.Context())
 
-	users, count, err := userSvc.List(param.Name, param.Phone, pn, ps)
+	users, page, err := userSvc.List(param.Name, param.Phone, &model.Page{Pn: pn, Ps: ps})
 	if err != nil {
-		resp.ToErrorResponse(errcode.GetUserListFail.WithDetails(err.Error()))
+		resp.Error(errcode.GetUserListFail.WithDetails(err.Error()))
 		return
 	}
-	resp.ToResponseList(users, count)
+	resp.SuccessList(users, page.Total)
 }
 
 // 查询单个用户 godoc
@@ -202,7 +203,7 @@ func (u User) Get(c *gin.Context) {
 
 	id, err := convert.StrTo(idStr).UInt()
 	if err != nil {
-		resp.ToErrorResponse(
+		resp.Error(
 			errcode.InvalidParams.WithMsg(
 				"id 格式错误",
 			),
@@ -215,12 +216,12 @@ func (u User) Get(c *gin.Context) {
 	user, err := userSvc.Get(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			resp.ToErrorResponse(errcode.NotFound.WithMsg("用户不存在"))
+			resp.Error(errcode.NotFound.WithMsg("用户不存在"))
 			return
 		}
-		resp.ToErrorResponse(errcode.GetUserFail.WithDetails(err.Error()))
+		resp.Error(errcode.GetUserFail.WithDetails(err.Error()))
 		return
 	}
-	resp.ToResponse(user)
+	resp.Success(user)
 	return
 }
