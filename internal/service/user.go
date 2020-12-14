@@ -126,20 +126,20 @@ func (u *UserService) Get(id uint) (*model.User, error) {
 	return userDao.Get(id)
 }
 
-func (u *UserService) List(name, phone string, pn, ps int) ([]*model.User, int64, error) {
+func (u *UserService) List(name, phone string, page *model.Page) ([]*model.User, *model.Page, error) {
 	userDao := dao.NewUserDao(global.DBEngine)
 
 	// 查询命中记录条数
 	count, err := userDao.Count(name, phone)
 	if err != nil {
-		return nil, 0, err
+		return nil, nil, err
 	}
 
 	// 获取当前页数据
-	users, err := userDao.List(name, phone, pn, ps)
+	users, err := userDao.List(name, phone, page)
 	if err != nil {
-		return nil, 0, err
+		return nil, nil, err
 	}
 
-	return users, count, nil
+	return users, page.WithTotal(count), nil
 }
