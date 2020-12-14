@@ -75,7 +75,7 @@ func (u *UserDao) List(name, phone string, page *model.Page) ([]*model.User, err
 	var users []*model.User
 
 	// 设置偏移量
-	offset := page.GetOffset()
+	offset := page.Offset()
 	if offset >= 0 && page.Ps > 0 {
 		db = db.Offset(offset).Limit(page.Ps)
 	}

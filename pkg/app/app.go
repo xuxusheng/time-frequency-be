@@ -16,7 +16,7 @@ func NewResponse(ctx *gin.Context) *Response {
 	}
 }
 
-func (r *Response) Success(data interface{}) {
+func (r *Response) ToSuccess(data interface{}) {
 	if data == nil {
 		data = gin.H{}
 	}
@@ -26,7 +26,7 @@ func (r *Response) Success(data interface{}) {
 	})
 }
 
-func (r *Response) SuccessList(list interface{}, total int) {
+func (r *Response) ToSuccessList(list interface{}, total int) {
 	r.Ctx.JSON(http.StatusOK, gin.H{
 		"meta": errcode.Success.Meta(),
 		"data": gin.H{
@@ -38,7 +38,7 @@ func (r *Response) SuccessList(list interface{}, total int) {
 	})
 }
 
-func (r *Response) Error(err *errcode.Error) {
+func (r *Response) ToError(err *errcode.Error) {
 	r.Ctx.JSON(err.StatusCode(), gin.H{
 		"meta": err.Meta(),
 		"data": gin.H{},

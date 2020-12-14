@@ -20,7 +20,7 @@ func NewUserService(ctx context.Context) *UserService {
 	}
 }
 
-// 创建用户，需要区分不能的错误类型，所有在 service 层中直接抛出 errcode.Error 类型，如果不需要区分的话，可以直接抛标准 Error 类型就行
+// 创建用户，需要区分不能的错误类型，所有在 service 层中直接抛出 errcode.Error 类型，如果不需要区分的话，可以直接抛标准 ToError 类型就行
 func (u *UserService) Create(name, phone, password string) (*pg_model.User, *errcode.Error) {
 
 	//userDao := dao.NewUserDao(global.DBEngine)
