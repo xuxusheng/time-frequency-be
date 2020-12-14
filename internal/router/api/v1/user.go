@@ -35,7 +35,7 @@ type CreateUserReq struct {
 // @Param name body string true "用户名（6-20位数字或字母构成)" minlength(6) maxlength(20)
 // @Param phone body string true "手机号（十一位数字）" minlength(11) maxlength(11)
 // @Param password body string true "密码"
-// @Success 200 {object} model.Resp{data=model.DWithP{data=model.User}}
+// @ToSuccess 200 {object} model.Resp{data=model.DWithP{data=model.User}}
 // @Failure 500 {object} model.ErrResp "内部错误"
 // @Router /api/v1/users [post]
 func (u User) Create(c *gin.Context) {
@@ -47,21 +47,21 @@ func (u User) Create(c *gin.Context) {
 	if !valid {
 		// 参数校验失败
 		global.Logger.Errorf(c, "app.BindAndValid errs: %v", errs)
-		resp.Error(errcode.InvalidParams.WithDetails(errs.Errors()...))
+		resp.ToError(errcode.InvalidParams.WithDetails(errs.Errors()...))
 		return
 	}
 
 	userSvc := service.NewUserService(c.Request.Context())
 
-	// service 返回的 err，已经是自定义的 errcode.Error 类型了
+	// service 返回的 err，已经是自定义的 errcode.ToError 类型了
 	_, err := userSvc.Create(param.Name, param.Phone, param.Password)
 	if err != nil {
 		global.Logger.Error(c, "userSvc.Create err: %v", err)
-		resp.Error(err)
+		resp.ToError(err)
 		return
 	}
 
-	resp.Success(nil)
+	resp.ToSuccess(nil)
 }
 
 // 删除用户 godoc
@@ -79,7 +79,7 @@ func (u User) Delete(c *gin.Context) {
 	// 检查 id 格式
 	id, err := convert.StrTo(c.Param("id")).Int()
 	if err != nil {
-		resp.Error(errcode.InvalidParams.WithMsg("id 格式错误"))
+		resp.ToError(errcode.InvalidParams.WithMsg("id 格式错误"))
 		return
 	}
 
@@ -87,10 +87,10 @@ func (u User) Delete(c *gin.Context) {
 
 	// 执行删除
 	if err := userSvc.Delete(id); err != nil {
-		resp.Error(err)
+		resp.ToError(err)
 		return
 	}
-	resp.Success(nil)
+	resp.ToSuccess(nil)
 	return
 }
 
@@ -118,7 +118,7 @@ func (u User) Update(c *gin.Context) {
 	// 检查 id 格式
 	id, err := convert.StrTo(c.Param("id")).Int()
 	if err != nil {
-		resp.Error(errcode.InvalidParams.WithMsg("id 格式错误"))
+		resp.ToError(errcode.InvalidParams.WithMsg("id 格式错误"))
 		return
 	}
 
@@ -127,18 +127,18 @@ func (u User) Update(c *gin.Context) {
 	if !valid {
 		// 参数校验失败
 		global.Logger.Errorf(c, "app.BindAndValid errs: %v", errs)
-		resp.Error(errcode.InvalidParams.WithDetails(errs.Errors()...))
+		resp.ToError(errcode.InvalidParams.WithDetails(errs.Errors()...))
 		return
 	}
 
 	userSvc := service.NewUserService(c.Request.Context())
 
 	if err := userSvc.Update(id, param.Name, param.Phone); err != nil {
-		resp.Error(err)
+		resp.ToError(err)
 		return
 	}
 
-	resp.Success(nil)
+	resp.ToSuccess(nil)
 }
 
 type UserListReq struct {
@@ -164,12 +164,12 @@ func (u User) List(c *gin.Context) {
 	resp := app.NewResponse(c)
 	param := UserListReq{}
 
-	// 这里的 errs 类型不是 errcode 包中定义的 Error，而是 app 包中定义的 ValidError
+	// 这里的 errs 类型不是 errcode 包中定义的 ToError，而是 app 包中定义的 ValidError
 	valid, errs := app.BindAndValid(c, &param)
 	if !valid {
 		// 参数校验失败
 		global.Logger.Errorf(c, "app.BindAndValid errs: %v", errs)
-		resp.Error(
+		resp.ToError(
 			errcode.InvalidParams.WithDetails(errs.Errors()...),
 		)
 		return
@@ -181,10 +181,10 @@ func (u User) List(c *gin.Context) {
 
 	users, count, err := userSvc.List(param.Name, param.Phone, &model.Page{Pn: pn, Ps: ps})
 	if err != nil {
-		resp.Error(errcode.GetUserListFail.WithDetails(err.Error()))
+		resp.ToError(errcode.GetUserListFail.WithDetails(err.Error()))
 		return
 	}
-	resp.SuccessList(users, page.Total)
+	resp.ToSuccessList(users, count)
 }
 
 // 查询单个用户 godoc
@@ -203,7 +203,7 @@ func (u User) Get(c *gin.Context) {
 
 	id, err := convert.StrTo(idStr).Int()
 	if err != nil {
-		resp.Error(
+		resp.ToError(
 			errcode.InvalidParams.WithMsg(
 				"id 格式错误",
 			),
@@ -216,12 +216,12 @@ func (u User) Get(c *gin.Context) {
 	user, err := userSvc.Get(id)
 	if err != nil {
 		if errors.Is(err, pg.ErrNoRows) {
-			resp.Error(errcode.NotFound.WithMsg("用户不存在"))
+			resp.ToError(errcode.NotFound.WithMsg("用户不存在"))
 			return
 		}
-		resp.Error(errcode.GetUserFail.WithDetails(err.Error()))
+		resp.ToError(errcode.GetUserFail.WithDetails(err.Error()))
 		return
 	}
-	resp.Success(user)
+	resp.ToSuccess(user)
 	return
 }
