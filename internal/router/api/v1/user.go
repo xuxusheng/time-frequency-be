@@ -3,13 +3,13 @@ package v1
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/go-pg/pg/v10"
 	"github.com/xuxusheng/time-frequency-be/global"
 	"github.com/xuxusheng/time-frequency-be/internal/model"
 	"github.com/xuxusheng/time-frequency-be/internal/service"
 	"github.com/xuxusheng/time-frequency-be/pkg/app"
 	"github.com/xuxusheng/time-frequency-be/pkg/convert"
 	"github.com/xuxusheng/time-frequency-be/pkg/errcode"
-	"gorm.io/gorm"
 )
 
 type User struct {
@@ -77,7 +77,7 @@ func (u User) Delete(c *gin.Context) {
 	resp := app.NewResponse(c)
 
 	// 检查 id 格式
-	id, err := convert.StrTo(c.Param("id")).UInt()
+	id, err := convert.StrTo(c.Param("id")).Int()
 	if err != nil {
 		resp.Error(errcode.InvalidParams.WithMsg("id 格式错误"))
 		return
@@ -116,7 +116,7 @@ func (u User) Update(c *gin.Context) {
 	resp := app.NewResponse(c)
 
 	// 检查 id 格式
-	id, err := convert.StrTo(c.Param("id")).UInt()
+	id, err := convert.StrTo(c.Param("id")).Int()
 	if err != nil {
 		resp.Error(errcode.InvalidParams.WithMsg("id 格式错误"))
 		return
@@ -179,7 +179,7 @@ func (u User) List(c *gin.Context) {
 	ps := app.GetPs(c)
 	userSvc := service.NewUserService(c.Request.Context())
 
-	users, page, err := userSvc.List(param.Name, param.Phone, &model.Page{Pn: pn, Ps: ps})
+	users, count, err := userSvc.List(param.Name, param.Phone, &model.Page{Pn: pn, Ps: ps})
 	if err != nil {
 		resp.Error(errcode.GetUserListFail.WithDetails(err.Error()))
 		return
@@ -201,7 +201,7 @@ func (u User) Get(c *gin.Context) {
 	resp := app.NewResponse(c)
 	idStr := c.Param("id")
 
-	id, err := convert.StrTo(idStr).UInt()
+	id, err := convert.StrTo(idStr).Int()
 	if err != nil {
 		resp.Error(
 			errcode.InvalidParams.WithMsg(
@@ -215,7 +215,7 @@ func (u User) Get(c *gin.Context) {
 
 	user, err := userSvc.Get(id)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if errors.Is(err, pg.ErrNoRows) {
 			resp.Error(errcode.NotFound.WithMsg("用户不存在"))
 			return
 		}

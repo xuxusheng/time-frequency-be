@@ -21,3 +21,8 @@ JWT:
   secret: this is a debug JWT secret
   Issuer: xusheng:20691718@qq.com
   Expire: 7200
+PG:
+  DBName: time-frequency
+  Username: time-frequency
+  Password: time-frequency
+  Host: home.xuxusheng.com:30681

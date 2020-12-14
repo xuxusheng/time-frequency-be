@@ -26,7 +26,7 @@ func (r *Response) Success(data interface{}) {
 	})
 }
 
-func (r *Response) SuccessList(list interface{}, total int64) {
+func (r *Response) SuccessList(list interface{}, total int) {
 	r.Ctx.JSON(http.StatusOK, gin.H{
 		"meta": errcode.Success.Meta(),
 		"data": gin.H{
