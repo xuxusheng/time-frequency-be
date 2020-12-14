@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/xuxusheng/time-frequency-be/global"
 	"github.com/xuxusheng/time-frequency-be/internal/model"
+	"github.com/xuxusheng/time-frequency-be/internal/pg_dao"
 	"github.com/xuxusheng/time-frequency-be/internal/router"
 	"github.com/xuxusheng/time-frequency-be/pkg/logger"
 	"github.com/xuxusheng/time-frequency-be/pkg/setting"
@@ -70,6 +71,11 @@ func init() {
 	if err != nil {
 		log.Fatalf("init.setupDBEngine err: %v", err)
 	}
+
+	err = setupPGEngine()
+	if err != nil {
+		log.Fatalf("init.setupPGEngine err: %v", err)
+	}
 }
 
 // 准备 Logger
@@ -102,6 +108,10 @@ func setupSetting() error {
 		return err
 	}
 	err = s.ReadSection("JWT", &global.JWTSetting)
+	if err != nil {
+		return err
+	}
+	err = s.ReadSection("PG", &global.PGSetting)
 	if err != nil {
 		return err
 	}
@@ -160,5 +170,11 @@ func setupSetting() error {
 func setupDBEngine() error {
 	var err error
 	global.DBEngine, err = model.NewDBEngine(global.DatabaseSetting)
+	return err
+}
+
+func setupPGEngine() error {
+	var err error
+	global.PGEngine, err = pg_dao.NewPGEngine(global.PGSetting)
 	return err
 }

@@ -10,4 +10,5 @@ var (
 	AppSetting      *setting.AppSettingS
 	DatabaseSetting *setting.DatabaseSettingS
 	JWTSetting      *setting.JWTSettingS
+	PGSetting       *setting.PGSettingS
 )
