@@ -1,8 +1,9 @@
 package dao
 
-import "gorm.io/gorm"
+import (
+	"github.com/go-pg/pg/v10"
+)
 
 type Dao struct {
-	engine *gorm.DB
-	// 如果需要的话，可以把 gin.Context 也挂进来
+	engine *pg.DB
 }
