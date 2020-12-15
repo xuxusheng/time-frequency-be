@@ -77,4 +77,4 @@ jobs:
         uses: WyriHaximus/github-action-helm3@v2
         with:
           kubeconfig: '${{ secrets.KUBE_CONFIG }}'
-          exec: helm upgrade $PROJECT_NAME ./_ci/$PROJECT_NAME --install --wait --namespace=$K3S_NAMESPACE-$STAGE --set image.repository=$ALI_IMAGE --set imagePullSecrets[0].name=aliyun-hk --set ingress.enabled=true --set ingress.hosts[0].host=$PROJECT_NAME.$STAGE.$K3S_DOMAIN --set ingress.hosts[0].paths[0]='/' --timeout=60s
+          exec: helm upgrade $PROJECT_NAME ./_ci/$PROJECT_NAME --install --wait --namespace=$K3S_NAMESPACE-$STAGE --set image.repository=$ALI_IMAGE --set imagePullSecrets[0].name=aliyun-hk --set ingress.enabled=true --set ingress.hosts[0].host=$PROJECT_NAME.$STAGE.$K3S_DOMAIN --set ingress.hosts[0].paths[0]='/' --timeout=120s
