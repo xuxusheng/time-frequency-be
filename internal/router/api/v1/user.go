@@ -35,7 +35,7 @@ type CreateUserReq struct {
 // @Param name body string true "用户名（6-20位数字或字母构成)" minlength(6) maxlength(20)
 // @Param phone body string true "手机号（十一位数字）" minlength(11) maxlength(11)
 // @Param password body string true "密码"
-// @ToSuccess 200 {object} model.Resp{data=model.DWithP{data=model.User}}
+// @Success 200 {object} model.Resp{data=model.User}
 // @Failure 500 {object} model.ErrResp "内部错误"
 // @Router /api/v1/users [post]
 func (u User) Create(c *gin.Context) {
@@ -54,14 +54,14 @@ func (u User) Create(c *gin.Context) {
 	userSvc := service.NewUserService(c.Request.Context())
 
 	// service 返回的 err，已经是自定义的 errcode.ToError 类型了
-	_, err := userSvc.Create(param.Name, param.Phone, param.Password)
+	user, err := userSvc.Create(param.Name, param.Phone, param.Password)
 	if err != nil {
 		global.Logger.Error(c, "userSvc.Create err: %v", err)
 		resp.ToError(err)
 		return
 	}
 
-	resp.ToSuccess(nil)
+	resp.ToSuccess(user)
 }
 
 // 删除用户 godoc
@@ -77,7 +77,7 @@ func (u User) Delete(c *gin.Context) {
 	resp := app.NewResponse(c)
 
 	// 检查 id 格式
-	id, err := convert.StrTo(c.Param("id")).Int()
+	id, err := convert.StrTo(c.Param("id")).UInt()
 	if err != nil {
 		resp.ToError(errcode.InvalidParams.WithMsg("id 格式错误"))
 		return
@@ -116,7 +116,7 @@ func (u User) Update(c *gin.Context) {
 	resp := app.NewResponse(c)
 
 	// 检查 id 格式
-	id, err := convert.StrTo(c.Param("id")).Int()
+	id, err := convert.StrTo(c.Param("id")).UInt()
 	if err != nil {
 		resp.ToError(errcode.InvalidParams.WithMsg("id 格式错误"))
 		return
@@ -133,12 +133,13 @@ func (u User) Update(c *gin.Context) {
 
 	userSvc := service.NewUserService(c.Request.Context())
 
-	if err := userSvc.Update(id, param.Name, param.Phone); err != nil {
-		resp.ToError(err)
+	user, cerr := userSvc.Update(id, param.Name, param.Phone)
+	if cerr != nil {
+		resp.ToError(cerr)
 		return
 	}
 
-	resp.ToSuccess(nil)
+	resp.ToSuccess(user)
 }
 
 type UserListReq struct {
@@ -201,7 +202,7 @@ func (u User) Get(c *gin.Context) {
 	resp := app.NewResponse(c)
 	idStr := c.Param("id")
 
-	id, err := convert.StrTo(idStr).Int()
+	id, err := convert.StrTo(idStr).UInt()
 	if err != nil {
 		resp.ToError(
 			errcode.InvalidParams.WithMsg(

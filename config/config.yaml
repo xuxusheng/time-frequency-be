@@ -6,23 +6,12 @@ Server:
 App:
   DefaultPageSize: 10
   MaxPageSize: 100
-Database:
-  DBType: mysql
-  Username: time-frequency
-  Password: time-frequency
-  Host: home.xuxusheng.com:31395
-  DBName: time-frequency
-  TablePrefix: ""
-  Charset: utf8
-  ParseTime: True
-  MaxIdleConns: 10
-  MaxOpenConns: 30
 JWT:
   secret: this is a debug JWT secret
   Issuer: xusheng:20691718@qq.com
   Expire: 7200
 PG:
-  DBName: time-frequency
-  Username: time-frequency
-  Password: time-frequency
-  Host: home.xuxusheng.com:30681
+  DBName: <这里替换为数据库名称>
+  Username: <这里替换为数据库用户名>
+  Password: <这里替换为数据库密码>
+  Host: <这里替换为数据库地址>

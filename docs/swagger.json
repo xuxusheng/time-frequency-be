@@ -106,7 +106,7 @@
                     {
                         "maxLength": 20,
                         "minLength": 6,
-                        "description": "用户名（6-20位数字或字母构成",
+                        "description": "用户名（6-20位数字或字母构成)",
                         "name": "name",
                         "in": "body",
                         "required": true,
@@ -147,19 +147,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "allOf": [
-                                                {
-                                                    "$ref": "#/definitions/model.DWithP"
-                                                },
-                                                {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "data": {
-                                                            "$ref": "#/definitions/model.User"
-                                                        }
-                                                    }
-                                                }
-                                            ]
+                                            "$ref": "#/definitions/model.User"
                                         }
                                     }
                                 }
@@ -386,32 +374,26 @@
             "type": "object",
             "properties": {
                 "created_at": {
-                    "description": "记录创建时间",
                     "type": "string",
                     "example": "2020-12-09T18:52:41.555+08:00"
                 },
                 "id": {
-                    "description": "唯一主键",
                     "type": "integer",
                     "example": 1
                 },
                 "name": {
-                    "description": "用户名（唯一、非空）",
                     "type": "string",
                     "example": "xusheng"
                 },
                 "phone": {
-                    "description": "手机号（唯一、非空）",
                     "type": "string",
                     "example": "17707272442"
                 },
                 "role": {
-                    "description": "用户角色，admin \u0026 member（非空、默认 member）",
                     "type": "string",
                     "example": "member"
                 },
                 "updated_at": {
-                    "description": "记录最后更新时间",
                     "type": "string",
                     "example": "2020-12-09T18:52:41.555+08:00"
                 }

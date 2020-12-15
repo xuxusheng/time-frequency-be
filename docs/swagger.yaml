@@ -62,27 +62,21 @@ definitions:
   model.User:
     properties:
       created_at:
-        description: 记录创建时间
         example: "2020-12-09T18:52:41.555+08:00"
         type: string
       id:
-        description: 唯一主键
         example: 1
         type: integer
       name:
-        description: 用户名（唯一、非空）
         example: xusheng
         type: string
       phone:
-        description: 手机号（唯一、非空）
         example: "17707272442"
         type: string
       role:
-        description: 用户角色，admin & member（非空、默认 member）
         example: member
         type: string
       updated_at:
-        description: 记录最后更新时间
         example: "2020-12-09T18:52:41.555+08:00"
         type: string
     type: object
@@ -148,7 +142,7 @@ paths:
       - application/json
       description: 创建新用户接口，专供管理平台调用
       parameters:
-      - description: 用户名（6-20位数字或字母构成
+      - description: 用户名（6-20位数字或字母构成)
         in: body
         maxLength: 20
         minLength: 6
@@ -180,12 +174,7 @@ paths:
             - $ref: '#/definitions/model.Resp'
             - properties:
                 data:
-                  allOf:
-                  - $ref: '#/definitions/model.DWithP'
-                  - properties:
-                      data:
-                        $ref: '#/definitions/model.User'
-                    type: object
+                  $ref: '#/definitions/model.User'
               type: object
         "500":
           description: 内部错误

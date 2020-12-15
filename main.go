@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/xuxusheng/time-frequency-be/global"
 	"github.com/xuxusheng/time-frequency-be/internal/model"
-	"github.com/xuxusheng/time-frequency-be/internal/pg_dao"
 	"github.com/xuxusheng/time-frequency-be/internal/router"
 	"github.com/xuxusheng/time-frequency-be/pkg/logger"
 	"github.com/xuxusheng/time-frequency-be/pkg/setting"
@@ -67,11 +66,6 @@ func init() {
 		log.Fatalf("init.setupSetting err: %v", err)
 	}
 
-	err = setupDBEngine()
-	if err != nil {
-		log.Fatalf("init.setupDBEngine err: %v", err)
-	}
-
 	err = setupPGEngine()
 	if err != nil {
 		log.Fatalf("init.setupPGEngine err: %v", err)
@@ -103,10 +97,6 @@ func setupSetting() error {
 	if err != nil {
 		return err
 	}
-	err = s.ReadSection("Database", &global.DatabaseSetting)
-	if err != nil {
-		return err
-	}
 	err = s.ReadSection("JWT", &global.JWTSetting)
 	if err != nil {
 		return err
@@ -127,23 +117,17 @@ func setupSetting() error {
 	if runMode = os.Getenv("SERVER_MODE"); runMode != "" {
 		global.ServerSetting.RunMode = runMode
 	}
-	if DBType := os.Getenv("DB_TYPE"); DBType != "" {
-		global.DatabaseSetting.DBType = DBType
+	if pgDBName := os.Getenv("PG_DBNAME"); pgDBName != "" {
+		global.PGSetting.DBName = pgDBName
 	}
-	if DBUser := os.Getenv("DB_USER"); DBUser != "" {
-		global.DatabaseSetting.UserName = DBUser
+	if pgUsername := os.Getenv("PG_USERNAME"); pgUsername != "" {
+		global.PGSetting.Username = pgUsername
 	}
-	if DBPwd := os.Getenv("DB_PWD"); DBPwd != "" {
-		global.DatabaseSetting.Password = DBPwd
+	if pgPassword := os.Getenv("PG_PASSWORD"); pgPassword != "" {
+		global.PGSetting.Password = pgPassword
 	}
-	if DBHost := os.Getenv("DB_HOST"); DBHost != "" {
-		global.DatabaseSetting.Host = DBHost
-	}
-	if DBName := os.Getenv("DB_Name"); DBName != "" {
-		global.DatabaseSetting.DBName = DBName
-	}
-	if tablePrefix := os.Getenv("DB_TABLE_PREFIX"); tablePrefix != "" {
-		global.DatabaseSetting.TablePrefix = tablePrefix
+	if pgHost := os.Getenv("PG_HOST"); pgHost != "" {
+		global.PGSetting.Host = pgHost
 	}
 
 	// 有这么个从启动命令参数中取配置的功能，但是以目前自己常用的部署方案来说，没啥必要支持这个
@@ -166,15 +150,8 @@ func setupSetting() error {
 
 }
 
-// 准备数据库连接
-func setupDBEngine() error {
-	var err error
-	global.DBEngine, err = model.NewDBEngine(global.DatabaseSetting)
-	return err
-}
-
 func setupPGEngine() error {
 	var err error
-	global.PGEngine, err = pg_dao.NewPGEngine(global.PGSetting)
+	global.PGEngine, err = model.NewPGEngine(global.PGSetting)
 	return err
 }

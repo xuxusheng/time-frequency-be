@@ -6,9 +6,8 @@ import (
 
 var (
 	// 全局配置
-	ServerSetting   *setting.ServerSettingS
-	AppSetting      *setting.AppSettingS
-	DatabaseSetting *setting.DatabaseSettingS
-	JWTSetting      *setting.JWTSettingS
-	PGSetting       *setting.PGSettingS
+	ServerSetting *setting.ServerSettingS
+	AppSetting    *setting.AppSettingS
+	JWTSetting    *setting.JWTSettingS
+	PGSetting     *setting.PGSettingS
 )
