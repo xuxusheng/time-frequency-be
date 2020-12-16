@@ -34,10 +34,6 @@ func NewApp() *iris.Application {
 	// swagger 文档
 	//app.Get("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	//if global.ServerSetting.RunMode == gin.DebugMode {
-	//app.Use(gin.Logger())
-	//}
-
 	// 在请求 header 中查询或生成 x-request-id 头，并调用 c.SetID
 	app.Use(requestid.New())
 	app.Use(middleware.Translations())
