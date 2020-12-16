@@ -79,7 +79,7 @@ func (l *Logger) WithFields(f Fields) *Logger {
 // 设置上下文属性
 func (l *Logger) WithContext(ctx iris.Context) *Logger {
 	ll := l.clone()
-	l.ctx = ctx
+	ll.ctx = ctx
 	return ll
 }
 
@@ -87,11 +87,11 @@ func (l *Logger) WithContext(ctx iris.Context) *Logger {
 func (l *Logger) WithTrace() *Logger {
 	fields := Fields{}
 
-	if id := l.ctx.Values().Get("X-Trace-ID"); id != "" {
+	if id := l.ctx.Values().Get("X-Trace-ID"); id != nil && id != "" {
 		fields["X-Trace-ID"] = id
 	}
 
-	if id := l.ctx.Values().Get("X-Span-ID"); id != "" {
+	if id := l.ctx.Values().Get("X-Span-ID"); id != nil && id != "" {
 		fields["X-Span-ID"] = id
 	}
 

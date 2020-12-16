@@ -5,7 +5,6 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/go-pg/pg/v10/orm"
 	"github.com/xuxusheng/time-frequency-be/pkg/setting"
-	"log"
 )
 
 func NewPGEngine(setting *setting.PGSettingS) (*pg.DB, error) {
@@ -20,7 +19,6 @@ func NewPGEngine(setting *setting.PGSettingS) (*pg.DB, error) {
 	if err := db.Ping(context.Background()); err != nil {
 		return nil, err
 	}
-	log.Println("pg 数据库连接成功")
 
 	// 创建 table
 	err := db.Model(&User{}).CreateTable(&orm.CreateTableOptions{

@@ -10,6 +10,7 @@ import (
 	"github.com/xuxusheng/time-frequency-be/pkg/logger"
 	"github.com/xuxusheng/time-frequency-be/pkg/setting"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"strings"
@@ -29,12 +30,24 @@ func main() {
 
 	go func() {
 
-		log.Println("发射！")
-		hostPort := ":" + global.ServerSetting.HttpPort
-		err := app.Listen(hostPort, iris.WithOptimizations)
+		log.Println("发射！🚀")
 
-		if err != nil && err != iris.ErrServerClosed {
-			log.Fatalf("app.Listen err: %v", err)
+		s := &http.Server{
+			Addr:           ":" + global.ServerSetting.HttpPort,
+			Handler:        app,
+			ReadTimeout:    global.ServerSetting.ReadTimeout,
+			WriteTimeout:   global.ServerSetting.WriteTimeout,
+			MaxHeaderBytes: 1 << 20,
+		}
+
+		err := app.Run(
+			iris.Server(s),
+			iris.WithOptimizations, // 开启优化功能，比如压缩返回的 json 字符串之类的
+			iris.WithoutServerError(iris.ErrServerClosed), // 忽略掉服务器关闭错误
+		)
+
+		if err != nil {
+			log.Fatalf("发射失败 ☠️ : %v", err)
 		}
 	}()
 
@@ -43,33 +56,33 @@ func main() {
 
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	log.Println("Shutdown down server...")
+	log.Println("返航中...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	if err := app.Shutdown(ctx); err != nil {
-		log.Fatal("Server forced to shutdown:", err)
+		log.Fatal("返航失败，强制着陆 🙏 : ", err)
 	}
-	log.Println("Server exiting")
+	log.Println("返航成功，拜拜~ 👋")
 
 }
 
 func init() {
 	setupLogger()
-	log.Println("日志组件准备完毕")
+	log.Println("日志组件 Ready! 👌")
 
 	err := setupSetting()
 	if err != nil {
 		log.Fatalf("init.setupSetting err: %v", err)
 	}
-	log.Println("配置项准备完毕")
+	log.Println("配置项 Ready! 👌")
 
 	err = setupPGEngine()
 	if err != nil {
 		log.Fatalf("init.setupPGEngine err: %v", err)
 	}
-	log.Println("数据库已连接")
+	log.Println("数据库连接 Ready! 👌")
 }
 
 // 准备 Logger
