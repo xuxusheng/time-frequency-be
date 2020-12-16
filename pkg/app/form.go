@@ -1,9 +1,9 @@
 package app
 
 import (
-	"github.com/gin-gonic/gin"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
+	"github.com/kataras/iris/v12"
 	"strings"
 )
 
@@ -30,12 +30,14 @@ func (v ValidErrors) Errors() []string {
 	return errs
 }
 
-func BindAndValid(c *gin.Context, v interface{}) (bool, ValidErrors) {
+func BindAndValid(c iris.Context, v interface{}) (bool, ValidErrors) {
 	var errs ValidErrors
-	err := c.ShouldBind(v)
+
+	err := c.ReadBody(v)
+
 	if err != nil {
 		// 从 ctx 中取出翻译器
-		trans, _ := c.Value("trans").(ut.Translator)
+		trans, _ := c.Values().Get("trans").(ut.Translator)
 
 		// 将 ShouldBind 返回的 err 推断为 ValidationErrors，gin 默认使用的是 validator 这个库来做校验
 		verrs, ok := err.(validator.ValidationErrors)
