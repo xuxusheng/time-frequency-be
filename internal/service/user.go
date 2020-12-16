@@ -123,6 +123,34 @@ func (u *UserService) Update(id uint, name, phone string) (*model.User, *errcode
 	return user, nil
 }
 
+func (u *UserService) UpdatePassword(id uint, oldPassword, newPassword string) *errcode.Error {
+
+	userDao := dao.NewUserDao(global.PGEngine)
+
+	// 判断旧密码是否正确
+	user, err := userDao.Get(id)
+	if err != nil {
+		return errcode.InternalServerError.WithDetails(err.Error())
+	}
+
+	err = app.ComparePWD(user.Password, oldPassword)
+	if err != nil {
+		return errcode.BadRequest.WithMsg("旧密码不正确")
+	}
+
+	// 验证通过，开始修改
+	hash, err := app.EncodePWD(newPassword)
+	if err != nil {
+		return errcode.InternalServerError.WithDetails(err.Error())
+	}
+
+	err = userDao.UpdatePassword(id, hash)
+	if err != nil {
+		return errcode.InternalServerError.WithDetails(err.Error())
+	}
+	return nil
+}
+
 func (u *UserService) Get(id uint) (*model.User, error) {
 	userDao := dao.NewUserDao(global.PGEngine)
 
@@ -130,22 +158,6 @@ func (u *UserService) Get(id uint) (*model.User, error) {
 }
 
 func (u *UserService) List(name, phone string, page *model.Page) ([]*model.User, int, error) {
-	//userDao := dao.NewUserDao(global.DBEngine)
-
-	//// 查询命中记录条数
-	//count, err := userDao.Count(name, phone)
-	//if err != nil {
-	//	return nil, 0, err
-	//}
-	//
-	//// 获取当前页数据
-	//users, err := userDao.List(name, phone, pn, ps)
-	//if err != nil {
-	//	return nil, 0, err
-	//}
-	//
-	//return users, count, nil
-
 	userDao := dao.NewUserDao(global.PGEngine)
 
 	users, count, err := userDao.ListAndCount(name, phone, page)
@@ -182,7 +194,8 @@ func (u *UserService) Login(name, password string) (string, *errcode.Error) {
 		global.JWTSetting.Expire,
 	)
 	claims := model.JWTClaims{
-		UID: user.ID,
+		UID:   user.ID,
+		Roles: []model.Role{model.Role(user.Role)},
 	}
 	token, err := signer.Sign(claims)
 	if err != nil {

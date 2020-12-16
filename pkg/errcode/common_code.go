@@ -5,6 +5,7 @@ var (
 
 	BadRequest     = NewError(10000400, "输入参数错误，请检查")
 	Unauthorized   = NewError(10000401, "验证失败")
+	Forbidden      = NewError(10000403, "禁止访问")
 	NotFound       = NewError(10000404, "找不到资源")
 	TooManyRequest = NewError(10000429, "请求过多")
 

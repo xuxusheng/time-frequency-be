@@ -10,6 +10,7 @@ import (
 	"github.com/xuxusheng/time-frequency-be/internal/service"
 	"github.com/xuxusheng/time-frequency-be/pkg/app"
 	"github.com/xuxusheng/time-frequency-be/pkg/errcode"
+	"log"
 )
 
 type User struct {
@@ -115,7 +116,6 @@ func (u User) Update(c iris.Context) {
 	param := UpdateUserReq{}
 	resp := app.NewResponse(c)
 
-	// 检查 id 格式
 	id, err := c.Params().GetUint("id")
 	if err != nil {
 		resp.ToError(errcode.BadRequest.WithMsg("id 格式错误"))
@@ -140,6 +140,68 @@ func (u User) Update(c iris.Context) {
 	}
 
 	resp.ToSuccess(user)
+}
+
+type UpdateUserPasswordReq struct {
+	OldPassword string `json:"old_password" validate:"required"`
+	NewPassword string `json:"new_password" validate:"required,min=6,max=20"`
+}
+
+// 修改用户密码 godoc
+// @summary 修改用户密码
+// @description 更新用户密码
+// @accept json
+// @produce json
+// @tags user
+// @param id path int true "用户ID"
+// @param old_password body string true "原密码"
+// @param new_password body string true "新密码"
+// @success 200 {object} model.Resp
+// @router /api/v1/users/{id}/password [put]
+func (u User) UpdatePassword(c iris.Context) {
+	param := UpdateUserPasswordReq{}
+	resp := app.NewResponse(c)
+
+	id, err := c.Params().GetUint("id")
+	if err != nil {
+		resp.ToError(errcode.BadRequest.WithMsg("id 格式错误"))
+		return
+	}
+
+	// 校验参数
+	valid, errs := app.BindAndValid(c, &param)
+	if !valid {
+		// 参数校验失败
+		global.Logger.Errorf(c, "app.BindAndValid errs: %v", errs)
+		resp.ToError(errcode.BadRequest.WithDetails(errs.Errors()...))
+		return
+	}
+
+	// 解析 token
+	claims := jwt.Get(c).(*model.JWTClaims)
+	log.Println(claims)
+	if claims.UID != id {
+		// 判断用户是否存在 admin 角色
+		isAdmin := false
+		for _, v := range claims.Roles {
+			if v == model.Admin {
+				isAdmin = true
+			}
+		}
+		if !isAdmin {
+			resp.ToError(errcode.Forbidden.WithMsg("非管理员不允许修改他人密码"))
+			return
+		}
+	}
+
+	// 修改密码
+	userSvc := service.NewUserService(c.Request().Context())
+	cerr := userSvc.UpdatePassword(id, param.OldPassword, param.NewPassword)
+	if cerr != nil {
+		resp.ToError(cerr)
+		return
+	}
+	resp.ToSuccess(nil)
 }
 
 type UserListReq struct {
