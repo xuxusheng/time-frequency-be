@@ -21,7 +21,9 @@
 + 生成环境关闭 swagger 文档
 + 开发环境加入数据库日志（失策，还是得把 mode 参数加回来）
 + 将 resp 封装到参数校验函数中去
-+ 在 errcode.Error 中加入一个 errDebug 字段，用来放不对用户展示的 debug 错误信息，与 errDetails 字段区分开，未来可以考虑在前端默认展示 errMsg，弄个按钮，点击出个显示 errDetails 的弹窗。
++ 在 errcode.Error 中加入一个 errDebug 字段，用来放不对用户展示的 debug 错误信息，与 errDetails 字段区分开，未来可以考虑在前端默认展示 errMsg，弄个按钮，点击出个显示 errDetails
+  的弹窗。
++ 日志库中使用的 color.New，优化一下，不要每次都 New
 
 **docs:**
 

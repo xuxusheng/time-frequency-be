@@ -3,6 +3,7 @@ package logger
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/fatih/color"
 	"github.com/kataras/iris/v12"
 	"io"
 	"log"
@@ -171,16 +172,16 @@ func (l *Logger) Output(level Level, message string) {
 
 	switch level {
 	case LevelDebug:
-		fallthrough
+		ll.newLogger.Println(color.New(color.FgBlue).SprintFunc()(content))
 	case LevelInfo:
-		fallthrough
+		ll.newLogger.Println(color.New(color.FgCyan).SprintFunc()(content))
 	case LevelWarn:
-		fallthrough
+		ll.newLogger.Println(color.New(color.FgYellow).SprintFunc()(content))
 	case LevelError:
-		ll.newLogger.Println(content)
-	case LevelFatal:
-		ll.newLogger.Fatal(content)
+		ll.newLogger.Println(color.New(color.FgRed).SprintFunc()(content))
 	case LevelPanic:
+		ll.newLogger.Fatal(color.New(color.FgMagenta).SprintFunc()(content))
+	case LevelFatal:
 		ll.newLogger.Panic(content)
 	}
 }
@@ -205,7 +206,7 @@ func (l *Logger) Warn(ctx iris.Context, v ...interface{}) {
 }
 
 func (l *Logger) Warnf(ctx iris.Context, format string, v ...interface{}) {
-	l.WithContext(ctx).Output(LevelInfo, fmt.Sprintf(format, v...))
+	l.WithContext(ctx).Output(LevelWarn, fmt.Sprintf(format, v...))
 }
 
 func (l *Logger) Error(ctx iris.Context, v ...interface{}) {
