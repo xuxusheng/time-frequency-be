@@ -19,6 +19,7 @@ RUN go get -u github.com/swaggo/swag/cmd/swag && \
 FROM alpine
 MAINTAINER xusheng:20691718@qq.com
 EXPOSE 80
+ENV SERVER_MODE=release
 ENV SERVER_PORT=80
 
 # 替换系统镜像源为阿里云

@@ -3,6 +3,7 @@ package setting
 import "time"
 
 type ServerSettingS struct {
+	Mode         string // release、debug、test
 	HttpPort     string
 	ReadTimeout  time.Duration
 	WriteTimeout time.Duration

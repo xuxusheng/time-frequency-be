@@ -6,6 +6,7 @@ require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/go-openapi/spec v0.20.0 // indirect
+	github.com/go-pg/pg/extra/pgdebug v0.2.0
 	github.com/go-pg/pg/v10 v10.7.3
 	github.com/go-playground/locales v0.13.0
 	github.com/go-playground/universal-translator v0.17.0
