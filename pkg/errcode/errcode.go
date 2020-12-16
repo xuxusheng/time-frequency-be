@@ -2,7 +2,7 @@ package errcode
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
+	"github.com/kataras/iris/v12"
 	"net/http"
 	"strings"
 )
@@ -35,8 +35,8 @@ func (e *Error) Error() string {
 	)
 }
 
-func (e *Error) Meta() *gin.H {
-	return &gin.H{
+func (e *Error) Meta() *iris.Map {
+	return &iris.Map{
 		"err_code":    e.Code(),
 		"err_msg":     e.Msg(),
 		"err_details": e.Details(),

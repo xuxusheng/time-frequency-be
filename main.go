@@ -3,14 +3,13 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/gin-gonic/gin"
+	"github.com/kataras/iris/v12"
 	"github.com/xuxusheng/time-frequency-be/global"
 	"github.com/xuxusheng/time-frequency-be/internal/model"
 	"github.com/xuxusheng/time-frequency-be/internal/router"
 	"github.com/xuxusheng/time-frequency-be/pkg/logger"
 	"github.com/xuxusheng/time-frequency-be/pkg/setting"
 	"log"
-	"net/http"
 	"os"
 	"os/signal"
 	"strings"
@@ -26,19 +25,15 @@ import (
 // @contact.url https://github.com/xuxusheng
 // @contact.email 20691718@qq.com
 func main() {
-	gin.SetMode(global.ServerSetting.RunMode)
-	s := &http.Server{
-		Addr:           ":" + global.ServerSetting.HttpPort,
-		Handler:        router.NewRouter(),
-		ReadTimeout:    global.ServerSetting.ReadTimeout,
-		WriteTimeout:   global.ServerSetting.WriteTimeout,
-		MaxHeaderBytes: 1 << 20,
-	}
+	//log.Println("启动模式设置为" + global.ServerSetting.RunMode)
+
+	app := router.NewApp()
 
 	go func() {
-		err := s.ListenAndServe()
-		if err != nil && err != http.ErrServerClosed {
-			log.Fatalf("s.ListenAndServe err: %v", err)
+		log.Println("发射！")
+		err := app.Listen(":" + global.ServerSetting.HttpPort)
+		if err != nil && err != iris.ErrServerClosed {
+			log.Fatalf("app.Listen err: %v", err)
 		}
 	}()
 
@@ -51,7 +46,8 @@ func main() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	if err := s.Shutdown(ctx); err != nil {
+
+	if err := app.Shutdown(ctx); err != nil {
 		log.Fatal("Server forced to shutdown:", err)
 	}
 	log.Println("Server exiting")
@@ -60,16 +56,19 @@ func main() {
 
 func init() {
 	setupLogger()
+	log.Println("日志组件准备完毕")
 
 	err := setupSetting()
 	if err != nil {
 		log.Fatalf("init.setupSetting err: %v", err)
 	}
+	log.Println("配置项准备完毕")
 
 	err = setupPGEngine()
 	if err != nil {
 		log.Fatalf("init.setupPGEngine err: %v", err)
 	}
+	log.Println("数据库已连接")
 }
 
 // 准备 Logger

@@ -1,16 +1,15 @@
 package app
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/kataras/iris/v12"
 	"github.com/xuxusheng/time-frequency-be/pkg/errcode"
-	"net/http"
 )
 
 type Response struct {
-	Ctx *gin.Context
+	Ctx iris.Context
 }
 
-func NewResponse(ctx *gin.Context) *Response {
+func NewResponse(ctx iris.Context) *Response {
 	return &Response{
 		Ctx: ctx,
 	}
@@ -18,18 +17,20 @@ func NewResponse(ctx *gin.Context) *Response {
 
 func (r *Response) ToSuccess(data interface{}) {
 	if data == nil {
-		data = gin.H{}
+		data = iris.Map{}
 	}
-	r.Ctx.JSON(http.StatusOK, gin.H{
+
+	r.Ctx.JSON(iris.Map{
 		"meta": errcode.Success.Meta(),
 		"data": data,
 	})
 }
 
 func (r *Response) ToSuccessList(list interface{}, total int) {
-	r.Ctx.JSON(http.StatusOK, gin.H{
+
+	r.Ctx.JSON(iris.Map{
 		"meta": errcode.Success.Meta(),
-		"data": gin.H{
+		"data": iris.Map{
 			"data":  list,
 			"pn":    GetPn(r.Ctx),
 			"ps":    GetPs(r.Ctx),
@@ -39,8 +40,9 @@ func (r *Response) ToSuccessList(list interface{}, total int) {
 }
 
 func (r *Response) ToError(err *errcode.Error) {
-	r.Ctx.JSON(err.StatusCode(), gin.H{
+	r.Ctx.StatusCode(err.StatusCode())
+	r.Ctx.JSON(iris.Map{
 		"meta": err.Meta(),
-		"data": gin.H{},
+		"data": iris.Map{},
 	})
 }
