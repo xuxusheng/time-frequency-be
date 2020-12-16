@@ -1,10 +1,9 @@
 package logger
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
+	"github.com/kataras/iris/v12"
 	"io"
 	"log"
 	"runtime"
@@ -46,7 +45,7 @@ func (l Level) String() string {
 type Logger struct {
 	// 在标准库的 log 模块基础上，进行一定的扩展
 	newLogger *log.Logger
-	ctx       context.Context
+	ctx       iris.Context
 	fields    Fields
 	callers   []string
 }
@@ -78,7 +77,7 @@ func (l *Logger) WithFields(f Fields) *Logger {
 }
 
 // 设置上下文属性
-func (l *Logger) WithContext(ctx context.Context) *Logger {
+func (l *Logger) WithContext(ctx iris.Context) *Logger {
 	ll := l.clone()
 	l.ctx = ctx
 	return ll
@@ -86,39 +85,26 @@ func (l *Logger) WithContext(ctx context.Context) *Logger {
 
 // 使用 opentracing 时用，在 fields 中加入 spanId 和 traceId 字段
 func (l *Logger) WithTrace() *Logger {
-	ginCtx, ok := l.ctx.(*gin.Context)
-	// 判断一下是不是 gin.Context，如果不是的话，不一定有 gin 框架提供的方法， 跳过这一步，直接原样返回
-	if ok {
+	fields := Fields{}
 
-		fields := Fields{}
+	if id := l.ctx.Values().Get("X-Trace-ID"); id != "" {
+		fields["X-Trace-ID"] = id
+	}
 
-		if traceID, ok := ginCtx.Get("X-Trace-ID"); ok {
-			fields["X-Trace-ID"] = traceID
-		}
+	if id := l.ctx.Values().Get("X-Span-ID"); id != "" {
+		fields["X-Span-ID"] = id
+	}
 
-		if spanID, ok := ginCtx.Get("X-Span-ID"); ok {
-			fields["X-Span-ID"] = spanID
-		}
-
-		if len(fields) > 0 {
-			return l.WithFields(fields)
-		}
+	if len(fields) > 0 {
+		return l.WithFields(fields)
 	}
 	return l
 }
 
 func (l *Logger) WithReqID() *Logger {
-	ginCtx, ok := l.ctx.(*gin.Context)
-	if ok {
-		fields := Fields{}
-		if reqID, ok := ginCtx.Get("x-request-id"); ok {
-			fields["x-request-id"] = reqID
-		}
-		if len(fields) > 0 {
-			return l.WithFields(fields)
-		}
-	}
-	return l
+	return l.WithFields(Fields{
+		"x-request-id": l.ctx.GetID(),
+	})
 }
 
 // 设置当前某一层调用栈信息（程序计数器、文件信息和行号）
@@ -199,49 +185,49 @@ func (l *Logger) Output(level Level, message string) {
 	}
 }
 
-func (l *Logger) Debug(ctx context.Context, v ...interface{}) {
+func (l *Logger) Debug(ctx iris.Context, v ...interface{}) {
 	l.WithContext(ctx).Output(LevelDebug, fmt.Sprint(v...))
 }
 
-func (l *Logger) Debugf(ctx context.Context, format string, v ...interface{}) {
+func (l *Logger) Debugf(ctx iris.Context, format string, v ...interface{}) {
 	l.WithContext(ctx).Output(LevelDebug, fmt.Sprintf(format, v...))
 }
 
-func (l *Logger) Info(ctx context.Context, v ...interface{}) {
+func (l *Logger) Info(ctx iris.Context, v ...interface{}) {
 	l.WithContext(ctx).Output(LevelInfo, fmt.Sprint(v...))
 }
-func (l *Logger) Infof(ctx context.Context, format string, v ...interface{}) {
+func (l *Logger) Infof(ctx iris.Context, format string, v ...interface{}) {
 	l.WithContext(ctx).Output(LevelInfo, fmt.Sprintf(format, v...))
 }
 
-func (l *Logger) Warn(ctx context.Context, v ...interface{}) {
+func (l *Logger) Warn(ctx iris.Context, v ...interface{}) {
 	l.WithContext(ctx).Output(LevelWarn, fmt.Sprint(v...))
 }
 
-func (l *Logger) Warnf(ctx context.Context, format string, v ...interface{}) {
+func (l *Logger) Warnf(ctx iris.Context, format string, v ...interface{}) {
 	l.WithContext(ctx).Output(LevelInfo, fmt.Sprintf(format, v...))
 }
 
-func (l *Logger) Error(ctx context.Context, v ...interface{}) {
+func (l *Logger) Error(ctx iris.Context, v ...interface{}) {
 	l.WithContext(ctx).Output(LevelError, fmt.Sprint(v...))
 }
 
-func (l *Logger) Errorf(ctx context.Context, format string, v ...interface{}) {
+func (l *Logger) Errorf(ctx iris.Context, format string, v ...interface{}) {
 	l.WithContext(ctx).Output(LevelError, fmt.Sprintf(format, v...))
 }
 
-func (l *Logger) Fatal(ctx context.Context, v ...interface{}) {
+func (l *Logger) Fatal(ctx iris.Context, v ...interface{}) {
 	l.WithContext(ctx).Output(LevelFatal, fmt.Sprint(v...))
 }
 
-func (l *Logger) Fatalf(ctx context.Context, format string, v ...interface{}) {
+func (l *Logger) Fatalf(ctx iris.Context, format string, v ...interface{}) {
 	l.WithContext(ctx).Output(LevelFatal, fmt.Sprintf(format, v...))
 }
 
-func (l *Logger) Panic(ctx context.Context, v ...interface{}) {
+func (l *Logger) Panic(ctx iris.Context, v ...interface{}) {
 	l.WithContext(ctx).Output(LevelPanic, fmt.Sprint(v...))
 }
 
-func (l *Logger) Panicf(ctx context.Context, format string, v ...interface{}) {
+func (l *Logger) Panicf(ctx iris.Context, format string, v ...interface{}) {
 	l.WithContext(ctx).Output(LevelPanic, fmt.Sprintf(format, v...))
 }

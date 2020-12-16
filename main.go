@@ -25,13 +25,14 @@ import (
 // @contact.url https://github.com/xuxusheng
 // @contact.email 20691718@qq.com
 func main() {
-	//log.Println("启动模式设置为" + global.ServerSetting.RunMode)
-
 	app := router.NewApp()
 
 	go func() {
+
 		log.Println("发射！")
-		err := app.Listen(":" + global.ServerSetting.HttpPort)
+		hostPort := ":" + global.ServerSetting.HttpPort
+		err := app.Listen(hostPort, iris.WithOptimizations)
+
 		if err != nil && err != iris.ErrServerClosed {
 			log.Fatalf("app.Listen err: %v", err)
 		}

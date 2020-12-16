@@ -45,7 +45,7 @@ func (u User) Create(c iris.Context) {
 	valid, errs := app.BindAndValid(c, &param)
 	if !valid {
 		// 参数校验失败
-		global.Logger.Errorf(c.Request().Context(), "app.BindAndValid errs: %v", errs)
+		global.Logger.Errorf(c, "app.BindAndValid errs: %v", errs)
 		resp.ToError(errcode.InvalidParams.WithDetails(errs.Errors()...))
 		return
 	}
@@ -55,7 +55,7 @@ func (u User) Create(c iris.Context) {
 	// service 返回的 err，已经是自定义的 errcode.ToError 类型了
 	user, err := userSvc.Create(param.Name, param.Phone, param.Password)
 	if err != nil {
-		global.Logger.Error(c.Request().Context(), "userSvc.Create err: %v", err)
+		global.Logger.Error(c, "userSvc.Create err: %v", err)
 		resp.ToError(err)
 		return
 	}
@@ -125,7 +125,7 @@ func (u User) Update(c iris.Context) {
 	valid, errs := app.BindAndValid(c, &param)
 	if !valid {
 		// 参数校验失败
-		global.Logger.Errorf(c.Request().Context(), "app.BindAndValid errs: %v", errs)
+		global.Logger.Errorf(c, "app.BindAndValid errs: %v", errs)
 		resp.ToError(errcode.InvalidParams.WithDetails(errs.Errors()...))
 		return
 	}
@@ -168,7 +168,7 @@ func (u User) List(c iris.Context) {
 	valid, errs := app.BindAndValid(c, &param)
 	if !valid {
 		// 参数校验失败
-		global.Logger.Errorf(c.Request().Context(), "app.BindAndValid errs: %v", errs)
+		global.Logger.Errorf(c, "app.BindAndValid errs: %v", errs)
 		resp.ToError(
 			errcode.InvalidParams.WithDetails(errs.Errors()...),
 		)
