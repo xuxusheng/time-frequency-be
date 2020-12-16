@@ -42,7 +42,7 @@ func AccessLog() iris.Handler {
 			"response": bodyWriter.body.String(),
 		}
 
-		s := "access log: method: %s, status_code: %d, " + "begin_time: %d, end_time: %d"
+		s := "【访问日志】 method: %s, status_code: %d, " + "begin_time: %d, end_time: %d"
 		global.Logger.WithFields(fields).Infof(
 			c,
 			s,
