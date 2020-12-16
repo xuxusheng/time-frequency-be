@@ -1,0 +1,11 @@
+version: '3'
+services:
+  pg:
+    image: postgres:12.2
+    restart: always
+    environment:
+      POSTGRES_DB: gotest
+      POSTGRES_USER: gotest
+      POSTGRES_PASSWORD: gotest
+    ports:
+      - 5432:5432

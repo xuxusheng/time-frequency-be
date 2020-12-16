@@ -58,7 +58,9 @@ func NewApp() *iris.Application {
 		// 删除用户
 		apiV1.Delete("/users/{id:uint}", user.Delete)
 		// 更新用户信息（通用信息字段）
-		apiV1.Put("/users/{id:int:uint}", user.Update)
+		apiV1.Put("/users/{id:uint}", user.Update)
+		// 更新密码
+		apiV1.Put("/users/{id:uint}/password", user.UpdatePassword)
 		// 获取用户列表
 		apiV1.Get("/users", user.List)
 		// 获取单个用户

@@ -298,6 +298,39 @@ paths:
       summary: 更新用户信息
       tags:
       - user
+  /api/v1/users/{id}/password:
+    put:
+      consumes:
+      - application/json
+      description: 更新用户密码
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 原密码
+        in: body
+        name: old_password
+        required: true
+        schema:
+          type: string
+      - description: 新密码
+        in: body
+        name: new_password
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Resp'
+      summary: 修改用户密码
+      tags:
+      - user
   /api/v1/users/me:
     get:
       description: 返回当前已登录账号的用户信息

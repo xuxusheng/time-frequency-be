@@ -54,6 +54,18 @@ func (u *UserDao) Update(id uint, name, phone string) (*model.User, error) {
 	return &user, nil
 }
 
+func (u *UserDao) UpdatePassword(id uint, pwd string) error {
+	user := model.User{
+		ID:       id,
+		Password: pwd,
+	}
+	_, err := u.engine.Model(&user).WherePK().Returning("*").UpdateNotZero()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (u *UserDao) Get(id uint) (*model.User, error) {
 	user := model.User{ID: id}
 	err := u.engine.Model(&user).WherePK().Select()

@@ -87,6 +87,8 @@ func (e *Error) StatusCode() int {
 		return http.StatusBadRequest
 	case Unauthorized.Code():
 		return http.StatusUnauthorized
+	case Forbidden.Code():
+		return http.StatusForbidden
 	case NotFound.Code():
 		return http.StatusNotFound
 	case TooManyRequest.Code():
