@@ -2,12 +2,13 @@ package model
 
 import (
 	"context"
+	"github.com/go-pg/pg/extra/pgdebug"
 	"github.com/go-pg/pg/v10"
 	"github.com/go-pg/pg/v10/orm"
 	"github.com/xuxusheng/time-frequency-be/pkg/setting"
 )
 
-func NewPGEngine(setting *setting.PGSettingS) (*pg.DB, error) {
+func NewPGEngine(setting *setting.PGSettingS, mode string) (*pg.DB, error) {
 
 	db := pg.Connect(&pg.Options{
 		Addr:     setting.Host,
@@ -15,6 +16,10 @@ func NewPGEngine(setting *setting.PGSettingS) (*pg.DB, error) {
 		Password: setting.Password,
 		Database: setting.DBName,
 	})
+
+	if mode == "debug" {
+		db.AddQueryHook(pgdebug.DebugHook{Verbose: true})
+	}
 
 	if err := db.Ping(context.Background()); err != nil {
 		return nil, err

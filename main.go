@@ -122,6 +122,9 @@ func setupSetting() error {
 	// 从环境变量中读取一部分配置，优先级大于配置文件，小于启动命令参数
 	// todo 这里可以看看 viper 有没有提供什么简单的从环境变量覆盖配置文件的功能，然后优化一下
 
+	if mode := os.Getenv("SERVER_MODE"); mode != "" {
+		global.ServerSetting.Mode = mode
+	}
 	if port := os.Getenv("SERVER_PORT"); port != "" {
 		global.ServerSetting.HttpPort = port
 	}
@@ -157,6 +160,6 @@ func setupSetting() error {
 
 func setupPGEngine() error {
 	var err error
-	global.PGEngine, err = model.NewPGEngine(global.PGSetting)
+	global.PGEngine, err = model.NewPGEngine(global.PGSetting, global.ServerSetting.Mode)
 	return err
 }
