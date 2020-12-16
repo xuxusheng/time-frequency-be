@@ -89,6 +89,39 @@ info:
   title: 时频学习平台
   version: "1.0"
 paths:
+  /api/v1/login:
+    post:
+      consumes:
+      - application/json
+      description: 使用用户名、密码登录，返回 JWT Token 字符串
+      parameters:
+      - description: 用户名
+        in: body
+        name: name
+        required: true
+        schema:
+          type: string
+      - description: 密码
+        in: body
+        name: phone
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.Resp'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: 登录
+      tags:
+      - auth
   /api/v1/users:
     get:
       consumes:
@@ -263,6 +296,24 @@ paths:
                   $ref: '#/definitions/model.User'
               type: object
       summary: 更新用户信息
+      tags:
+      - user
+  /api/v1/users/me:
+    get:
+      description: 返回当前已登录账号的用户信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.Resp'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.User'
+              type: object
+      summary: 获取当前用户信息
       tags:
       - user
 swagger: "2.0"

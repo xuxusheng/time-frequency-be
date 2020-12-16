@@ -42,16 +42,17 @@ func NewApp() *iris.Application {
 	app.Use(middleware.Translations())
 	app.Use(middleware.AccessLog())
 
-	app.Get("/ping", func(c iris.Context) {
-		_, _ = c.JSON(iris.Map{
-			"message": "pong",
-		})
-	})
-
 	// 业务接口
 	apiV1 := app.Party("/api/v1")
+	auth := v1.NewAuth()
+	user := v1.NewUser()
 	{
-		user := v1.NewUser()
+
+		// 登录
+		apiV1.Post("/login", auth.Login)
+
+		// ---- 以下接口需要登录才能访问
+		apiV1.Use(middleware.JWT())
 		// 添加用户
 		apiV1.Post("/users", user.Create)
 		// 删除用户
@@ -62,6 +63,8 @@ func NewApp() *iris.Application {
 		apiV1.Get("/users", user.List)
 		// 获取单个用户
 		apiV1.Get("/users/{id:uint}", user.Get)
+		// 获取当前用户的信息
+		apiV1.Get("/users/me", user.Me)
 	}
 
 	return app

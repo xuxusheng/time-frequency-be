@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"github.com/go-pg/pg/v10"
+	"github.com/kataras/iris/v12/middleware/jwt"
 	"github.com/xuxusheng/time-frequency-be/global"
 	"github.com/xuxusheng/time-frequency-be/internal/dao"
 	"github.com/xuxusheng/time-frequency-be/internal/model"
@@ -122,7 +124,6 @@ func (u *UserService) Update(id uint, name, phone string) (*model.User, *errcode
 }
 
 func (u *UserService) Get(id uint) (*model.User, error) {
-	//userDao := dao.NewUserDao(global.DBEngine)
 	userDao := dao.NewUserDao(global.PGEngine)
 
 	return userDao.Get(id)
@@ -153,4 +154,40 @@ func (u *UserService) List(name, phone string, page *model.Page) ([]*model.User,
 	}
 	return users, count, nil
 
+}
+
+// 校验密码
+func (u *UserService) Login(name, password string) (string, *errcode.Error) {
+	userDao := dao.NewUserDao(global.PGEngine)
+
+	// 从数据库中取出 user
+	user, err := userDao.GetByName(name)
+	if err != nil {
+		if err == pg.ErrNoRows {
+			return "", errcode.UnauthorizedUserError
+		}
+		return "", errcode.InternalServerError.WithDetails(err.Error())
+	}
+
+	// 校验密码
+	err = app.ComparePWD(user.Password, password)
+	if err != nil {
+		return "", errcode.UnauthorizedUserError
+	}
+
+	// 校验通过，生成 token
+	signer := jwt.NewSigner(
+		jwt.HS256,
+		global.JWTSetting.Secret,
+		global.JWTSetting.Expire,
+	)
+	claims := model.JWTClaims{
+		UID: user.ID,
+	}
+	token, err := signer.Sign(claims)
+	if err != nil {
+		return "", errcode.InternalServerError.WithDetails(err.Error())
+	}
+
+	return string(token), nil
 }

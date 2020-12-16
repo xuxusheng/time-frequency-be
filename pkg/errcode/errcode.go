@@ -80,28 +80,34 @@ func (e *Error) WithDetails(details ...string) *Error {
 
 func (e *Error) StatusCode() int {
 	switch e.Code() {
+	// 通用错误
 	case Success.Code():
 		return http.StatusOK
-	case ServerError.Code():
-		return http.StatusInternalServerError
+	case BadRequest.Code():
+		return http.StatusBadRequest
+	case Unauthorized.Code():
+		return http.StatusUnauthorized
 	case NotFound.Code():
 		return http.StatusNotFound
+	case TooManyRequest.Code():
+		return http.StatusTooManyRequests
+	case InternalServerError.Code():
+		return http.StatusInternalServerError
+	case ServiceUnavailable.Code():
+		return http.StatusServiceUnavailable
 
+	case UnauthorizedUserError.Code():
+		fallthrough
 		// token 校验相关的错误
 	case UnauthorizedTokenEmpty.Code():
 		fallthrough
-	case UnauthorizedAuthNotExist.Code():
+	case UnauthorizedTokenError.Code():
 		fallthrough
-	case UnauthorizedTokenTimeout.Code():
+	case UnauthorizedTokenExpired.Code():
 		fallthrough
 	case UnauthorizedTokenGenerate.Code():
 		return http.StatusUnauthorized
 
-		// 请求过多
-	case TooManyRequest.Code():
-		return http.StatusTooManyRequests
-
-		// 输入错误
 	case CreateUserFailNameExist.Code():
 		fallthrough
 	case CreateUserFailPhoneExist.Code():
@@ -109,10 +115,7 @@ func (e *Error) StatusCode() int {
 	case UpdateUserFailNameExist.Code():
 		fallthrough
 	case UpdateUserFailPhoneExist.Code():
-		fallthrough
-	case InvalidParams.Code():
 		return http.StatusBadRequest
-
 	}
 
 	// 默认返回 500
