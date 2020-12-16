@@ -106,16 +106,11 @@ func setupSetting() error {
 		return err
 	}
 
-	var runMode string
-
 	// 从环境变量中读取一部分配置，优先级大于配置文件，小于启动命令参数
 	// todo 这里可以看看 viper 有没有提供什么简单的从环境变量覆盖配置文件的功能，然后优化一下
 
 	if port := os.Getenv("SERVER_PORT"); port != "" {
 		global.ServerSetting.HttpPort = port
-	}
-	if runMode = os.Getenv("SERVER_MODE"); runMode != "" {
-		global.ServerSetting.RunMode = runMode
 	}
 	if pgDBName := os.Getenv("PG_DBNAME"); pgDBName != "" {
 		global.PGSetting.DBName = pgDBName
@@ -136,9 +131,6 @@ func setupSetting() error {
 	//flag.StringVar(&runMode, "mode", "", "启动模式，debug 或 release")
 	//if port != "" {
 	//	global.ServerSetting.HttpPort = port
-	//}
-	//if runMode != "" {
-	//	global.ServerSetting.RunMode = runMode
 	//}
 
 	// 默认从 yaml 文件中导入进来的时间，单位不是秒，需要转换一下

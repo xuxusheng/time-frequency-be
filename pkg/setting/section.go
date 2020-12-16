@@ -3,7 +3,6 @@ package setting
 import "time"
 
 type ServerSettingS struct {
-	RunMode      string
 	HttpPort     string
 	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
