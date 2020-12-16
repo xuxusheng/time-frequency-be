@@ -31,9 +31,9 @@ type CreateUserReq struct {
 // @Accept json
 // @Produce json
 // @Tags user
-// @Param name body string true "用户名（6-20位数字或字母构成)" minlength(6) maxlength(20)
-// @Param phone body string true "手机号（十一位数字）" minlength(11) maxlength(11)
-// @Param password body string true "密码"
+// @Param name body string true "用户名（6 - 20 位数字或字母构成)" minlength(6) maxlength(20)
+// @Param phone body string true "手机号（11 位数字）" minlength(11) maxlength(11)
+// @Param password body string true "密码（6 - 20 位字符）"
 // @Success 200 {object} model.Resp{data=model.User}
 // @Failure 500 {object} model.ErrResp "内部错误"
 // @Router /api/v1/users [post]
@@ -108,7 +108,7 @@ type UpdateUserReq struct {
 // @param id path int true "用户ID"
 // @param name body string false "用户名"
 // @param phone body string false "手机号"
-// @success 200 {object} model.Resp
+// @success 200 {object} model.Resp{data=model.User}
 // @router /api/v1/users/{id} [put]
 func (u User) Update(c iris.Context) {
 	param := UpdateUserReq{}

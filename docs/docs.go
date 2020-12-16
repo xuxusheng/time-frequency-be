@@ -123,7 +123,7 @@ var doc = `{
                     {
                         "maxLength": 20,
                         "minLength": 6,
-                        "description": "用户名（6-20位数字或字母构成)",
+                        "description": "用户名（6 - 20 位数字或字母构成)",
                         "name": "name",
                         "in": "body",
                         "required": true,
@@ -134,7 +134,7 @@ var doc = `{
                     {
                         "maxLength": 11,
                         "minLength": 11,
-                        "description": "手机号（十一位数字）",
+                        "description": "手机号（11 位数字）",
                         "name": "phone",
                         "in": "body",
                         "required": true,
@@ -143,7 +143,7 @@ var doc = `{
                         }
                     },
                     {
-                        "description": "密码",
+                        "description": "密码（6 - 20 位字符）",
                         "name": "password",
                         "in": "body",
                         "required": true,
@@ -263,7 +263,19 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Resp"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.Resp"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.User"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }

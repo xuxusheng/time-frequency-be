@@ -142,7 +142,7 @@ paths:
       - application/json
       description: 创建新用户接口，专供管理平台调用
       parameters:
-      - description: 用户名（6-20位数字或字母构成)
+      - description: 用户名（6 - 20 位数字或字母构成)
         in: body
         maxLength: 20
         minLength: 6
@@ -150,7 +150,7 @@ paths:
         required: true
         schema:
           type: string
-      - description: 手机号（十一位数字）
+      - description: 手机号（11 位数字）
         in: body
         maxLength: 11
         minLength: 11
@@ -158,7 +158,7 @@ paths:
         required: true
         schema:
           type: string
-      - description: 密码
+      - description: 密码（6 - 20 位字符）
         in: body
         name: password
         required: true
@@ -256,7 +256,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Resp'
+            allOf:
+            - $ref: '#/definitions/model.Resp'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.User'
+              type: object
       summary: 更新用户信息
       tags:
       - user

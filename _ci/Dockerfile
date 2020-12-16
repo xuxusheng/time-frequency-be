@@ -17,6 +17,9 @@ RUN go get -u github.com/swaggo/swag/cmd/swag && \
 # ------ 分界线 ------
 
 FROM alpine
+MAINTAINER xusheng:20691718@qq.com
+EXPOSE 80
+ENV SERVER_PORT=80
 
 # 替换系统镜像源为阿里云
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
@@ -28,5 +31,4 @@ ENV TZ Asia/Shanghai
 WORKDIR /project
 COPY --from=builder /go/bin/app /project/app
 COPY --from=builder /project/config /project/config
-ENV SERVER_PORT=80
 ENTRYPOINT ["/project/app"]
