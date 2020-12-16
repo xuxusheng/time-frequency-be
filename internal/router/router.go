@@ -1,9 +1,11 @@
 package router
 
 import (
+	"github.com/iris-contrib/swagger/v12"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/middleware/recover"
 	"github.com/kataras/iris/v12/middleware/requestid"
+	swaggerFiles "github.com/swaggo/files"
 	_ "github.com/xuxusheng/time-frequency-be/docs"
 	"github.com/xuxusheng/time-frequency-be/global"
 	"github.com/xuxusheng/time-frequency-be/internal/middleware"
@@ -33,6 +35,7 @@ func NewApp() *iris.Application {
 
 	// swagger 文档
 	//app.Get("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	app.Get("/swagger/{any:path}", swagger.WrapHandler(swaggerFiles.Handler))
 
 	// 在请求 header 中查询或生成 x-request-id 头，并调用 c.SetID
 	app.Use(requestid.New())
