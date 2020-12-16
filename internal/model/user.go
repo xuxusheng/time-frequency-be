@@ -4,8 +4,8 @@ import "time"
 
 type User struct {
 	ID       uint   `json:"id" example:"1"`
-	Name     string `json:"name" example:"xusheng" pg:",notnull"`
-	Phone    string `json:"phone" example:"17707272442" pg:",notnull"`
+	Name     string `json:"name" example:"xusheng" pg:",unique,notnull"`
+	Phone    string `json:"phone" example:"17707272442" pg:",unique,notnull"`
 	Role     string `json:"role" example:"member" pg:"default:('member'),notnull"`
 	Password string `json:"-" pg:",notnull"`
 

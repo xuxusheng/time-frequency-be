@@ -1,9 +1,11 @@
 package errcode
 
 var (
-	UnauthorizedTokenEmpty    = NewError(20000001, "鉴权失败，token 为空")
-	UnauthorizedAuthNotExist  = NewError(20000002, "鉴权失败，找不到对应的 AppKey 和 AppSecret")
-	UnauthorizedTokenError    = NewError(20000003, "鉴权失败，Token 错误")
-	UnauthorizedTokenTimeout  = NewError(20000004, "鉴权失败，Token超时")
-	UnauthorizedTokenGenerate = NewError(20000005, "鉴权失败，Token生成失败")
+	UnauthorizedUserError = NewError(20000001, "用户不存在或密码错误")
+
+	UnauthorizedTokenEmpty   = NewError(20000002, "鉴权失败，token 不存在")
+	UnauthorizedTokenError   = NewError(20000003, "鉴权失败，Token 不合法")
+	UnauthorizedTokenExpired = NewError(20000004, "鉴权失败，Token 已过期")
+	// todo 这个错误好像有点问题，应该放登录的时候用？
+	UnauthorizedTokenGenerate = NewError(20000005, "鉴权失败，Token 生成失败")
 )

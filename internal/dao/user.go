@@ -63,6 +63,15 @@ func (u *UserDao) Get(id uint) (*model.User, error) {
 	return &user, nil
 }
 
+func (u *UserDao) GetByName(name string) (*model.User, error) {
+	var user model.User
+	err := u.engine.Model(&user).Where("name = ?", name).Select()
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 func (u *UserDao) ListAndCount(name, phone string, page *model.Page) ([]*model.User, int, error) {
 	var users []*model.User
 	count, err := u.engine.

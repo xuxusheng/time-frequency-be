@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/go-pg/pg/v10"
 	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/middleware/jwt"
 	"github.com/xuxusheng/time-frequency-be/global"
 	"github.com/xuxusheng/time-frequency-be/internal/model"
 	"github.com/xuxusheng/time-frequency-be/internal/service"
@@ -46,7 +47,7 @@ func (u User) Create(c iris.Context) {
 	if !valid {
 		// 参数校验失败
 		global.Logger.Errorf(c, "app.BindAndValid errs: %v", errs)
-		resp.ToError(errcode.InvalidParams.WithDetails(errs.Errors()...))
+		resp.ToError(errcode.BadRequest.WithDetails(errs.Errors()...))
 		return
 	}
 
@@ -78,7 +79,7 @@ func (u User) Delete(c iris.Context) {
 	id, err := c.Params().GetUint("id")
 
 	if err != nil {
-		resp.ToError(errcode.InvalidParams.WithMsg("id 格式错误"))
+		resp.ToError(errcode.BadRequest.WithMsg("id 格式错误"))
 		return
 	}
 
@@ -117,7 +118,7 @@ func (u User) Update(c iris.Context) {
 	// 检查 id 格式
 	id, err := c.Params().GetUint("id")
 	if err != nil {
-		resp.ToError(errcode.InvalidParams.WithMsg("id 格式错误"))
+		resp.ToError(errcode.BadRequest.WithMsg("id 格式错误"))
 		return
 	}
 
@@ -126,7 +127,7 @@ func (u User) Update(c iris.Context) {
 	if !valid {
 		// 参数校验失败
 		global.Logger.Errorf(c, "app.BindAndValid errs: %v", errs)
-		resp.ToError(errcode.InvalidParams.WithDetails(errs.Errors()...))
+		resp.ToError(errcode.BadRequest.WithDetails(errs.Errors()...))
 		return
 	}
 
@@ -170,7 +171,7 @@ func (u User) List(c iris.Context) {
 		// 参数校验失败
 		global.Logger.Errorf(c, "app.BindAndValid errs: %v", errs)
 		resp.ToError(
-			errcode.InvalidParams.WithDetails(errs.Errors()...),
+			errcode.BadRequest.WithDetails(errs.Errors()...),
 		)
 		return
 	}
@@ -197,19 +198,46 @@ func (u User) List(c iris.Context) {
 // @success 200 {object} model.Resp{data=model.User}
 // @router /api/v1/users/{id} [get]
 func (u User) Get(c iris.Context) {
-
 	resp := app.NewResponse(c)
 
 	id, err := c.Params().GetUint("id")
 
 	if err != nil {
-		resp.ToError(errcode.InvalidParams.WithMsg("id 格式错误"))
+		resp.ToError(errcode.BadRequest.WithMsg("id 格式错误"))
 		return
 	}
 
 	userSvc := service.NewUserService(c.Request().Context())
 
 	user, err := userSvc.Get(id)
+	if err != nil {
+		if errors.Is(err, pg.ErrNoRows) {
+			resp.ToError(errcode.NotFound.WithMsg("用户不存在"))
+			return
+		}
+		resp.ToError(errcode.GetUserFail.WithDetails(err.Error()))
+		return
+	}
+	resp.ToSuccess(user)
+	return
+}
+
+// 获取当前用户信息 godoc
+// @summary 获取当前用户信息
+// @description 返回当前已登录账号的用户信息
+// @produce json
+// @tags user
+// @success 200 {object} model.Resp{data=model.User}
+// @router /api/v1/users/me [get]
+func (u User) Me(c iris.Context) {
+	resp := app.NewResponse(c)
+
+	// 从 token 中解析 uid 出来
+	claims := jwt.Get(c).(*model.JWTClaims)
+
+	userSvc := service.NewUserService(c.Request().Context())
+
+	user, err := userSvc.Get(claims.UID)
 	if err != nil {
 		if errors.Is(err, pg.ErrNoRows) {
 			resp.ToError(errcode.NotFound.WithMsg("用户不存在"))
