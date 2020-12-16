@@ -1,63 +1,68 @@
 package router
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/iris-contrib/swagger/v12"
+	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/middleware/recover"
+	"github.com/kataras/iris/v12/middleware/requestid"
 	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 	_ "github.com/xuxusheng/time-frequency-be/docs"
 	"github.com/xuxusheng/time-frequency-be/global"
 	"github.com/xuxusheng/time-frequency-be/internal/middleware"
 	v1 "github.com/xuxusheng/time-frequency-be/internal/router/api/v1"
-	"net/http"
 )
 
-func NewRouter() *gin.Engine {
-	r := gin.New()
+func NewApp() *iris.Application {
 
-	r.Use(gin.Recovery())
+	app := iris.New()
+	app.Validator = global.Validator
+
+	app.UseRouter(recover.New())
+	// 对请求进行压缩
+	app.Use(iris.Compression)
 
 	// 健康检查
-	r.GET("/liveness", func(c *gin.Context) {
-		c.AbortWithStatus(http.StatusNoContent)
-	}).GET("/readiness", func(c *gin.Context) {
+	app.Get("/liveness", func(c iris.Context) {
+		c.StopWithStatus(iris.StatusNoContent)
+	})
+	app.Get("/readiness", func(c iris.Context) {
 		if global.PGEngine != nil {
-			c.AbortWithStatus(http.StatusNoContent)
+			c.StopWithStatus(iris.StatusNoContent)
+			return
 		}
-		c.AbortWithStatus(http.StatusServiceUnavailable)
+		c.StopWithStatus(iris.StatusServiceUnavailable)
 	})
 
 	// swagger 文档
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	//app.Get("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	app.Get("/swagger/{any:path}", swagger.WrapHandler(swaggerFiles.Handler))
 
-	if global.ServerSetting.RunMode == gin.DebugMode {
-		r.Use(gin.Logger())
-	}
+	// 在请求 header 中查询或生成 x-request-id 头，并调用 c.SetID
+	app.Use(requestid.New())
+	app.Use(middleware.Translations())
+	app.Use(middleware.AccessLog())
 
-	r.Use(middleware.RequestID())
-	r.Use(middleware.Translations())
-	r.Use(middleware.AccessLog())
-
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"ping": "pong",
+	app.Get("/ping", func(c iris.Context) {
+		_, _ = c.JSON(iris.Map{
+			"message": "pong",
 		})
 	})
 
 	// 业务接口
-	apiv1 := r.Group("/api/v1")
+	apiV1 := app.Party("/api/v1")
 	{
 		user := v1.NewUser()
 		// 添加用户
-		apiv1.POST("/users", user.Create)
+		apiV1.Post("/users", user.Create)
 		// 删除用户
-		apiv1.DELETE("/users/:id", user.Delete)
+		apiV1.Delete("/users/{id:uint}", user.Delete)
 		// 更新用户信息（通用信息字段）
-		apiv1.PUT("/users/:id", user.Update)
+		apiV1.Put("/users/{id:int:uint}", user.Update)
 		// 获取用户列表
-		apiv1.GET("/users", user.List)
+		apiV1.Get("/users", user.List)
 		// 获取单个用户
-		apiv1.GET("/users/:id", user.Get)
+		apiV1.Get("/users/{id:uint}", user.Get)
 	}
 
-	return r
+	return app
 }

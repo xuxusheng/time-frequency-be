@@ -29,5 +29,4 @@ WORKDIR /project
 COPY --from=builder /go/bin/app /project/app
 COPY --from=builder /project/config /project/config
 ENV SERVER_PORT=80
-ENV SERVER_MODE=release
 ENTRYPOINT ["/project/app"]

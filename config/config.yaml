@@ -1,5 +1,4 @@
 Server:
-  RunMode: debug
   HttpPort: 8080
   ReadTimeout: 60
   WriteTime: 60
@@ -11,7 +10,7 @@ JWT:
   Issuer: xusheng:20691718@qq.com
   Expire: 7200
 PG:
-  DBName: <这里替换为数据库名称>
-  Username: <这里替换为数据库用户名>
-  Password: <这里替换为数据库密码>
-  Host: <这里替换为数据库地址>
+  DBName: time-frequency
+  Username: time-frequency
+  Password: time-frequency
+  Host: home.xuxusheng.com:30681

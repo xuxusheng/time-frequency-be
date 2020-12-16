@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/gin-gonic/gin"
+	"github.com/kataras/iris/v12"
 	"github.com/xuxusheng/time-frequency-be/global"
 	"github.com/xuxusheng/time-frequency-be/internal/model"
 	"github.com/xuxusheng/time-frequency-be/internal/router"
@@ -26,19 +26,28 @@ import (
 // @contact.url https://github.com/xuxusheng
 // @contact.email 20691718@qq.com
 func main() {
-	gin.SetMode(global.ServerSetting.RunMode)
-	s := &http.Server{
-		Addr:           ":" + global.ServerSetting.HttpPort,
-		Handler:        router.NewRouter(),
-		ReadTimeout:    global.ServerSetting.ReadTimeout,
-		WriteTimeout:   global.ServerSetting.WriteTimeout,
-		MaxHeaderBytes: 1 << 20,
-	}
+	app := router.NewApp()
 
 	go func() {
-		err := s.ListenAndServe()
-		if err != nil && err != http.ErrServerClosed {
-			log.Fatalf("s.ListenAndServe err: %v", err)
+
+		log.Println("发射！🚀")
+
+		s := &http.Server{
+			Addr:           ":" + global.ServerSetting.HttpPort,
+			Handler:        app,
+			ReadTimeout:    global.ServerSetting.ReadTimeout,
+			WriteTimeout:   global.ServerSetting.WriteTimeout,
+			MaxHeaderBytes: 1 << 20,
+		}
+
+		err := app.Run(
+			iris.Server(s),
+			iris.WithOptimizations, // 开启优化功能，比如压缩返回的 json 字符串之类的
+			iris.WithoutServerError(iris.ErrServerClosed), // 忽略掉服务器关闭错误
+		)
+
+		if err != nil {
+			log.Fatalf("发射失败 ☠️ : %v", err)
 		}
 	}()
 
@@ -47,29 +56,33 @@ func main() {
 
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	log.Println("Shutdown down server...")
+	log.Println("返航中...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	if err := s.Shutdown(ctx); err != nil {
-		log.Fatal("Server forced to shutdown:", err)
+
+	if err := app.Shutdown(ctx); err != nil {
+		log.Fatal("返航失败，强制着陆 🙏 : ", err)
 	}
-	log.Println("Server exiting")
+	log.Println("返航成功，拜拜~ 👋")
 
 }
 
 func init() {
 	setupLogger()
+	log.Println("日志组件 Ready! 👌")
 
 	err := setupSetting()
 	if err != nil {
 		log.Fatalf("init.setupSetting err: %v", err)
 	}
+	log.Println("配置项 Ready! 👌")
 
 	err = setupPGEngine()
 	if err != nil {
 		log.Fatalf("init.setupPGEngine err: %v", err)
 	}
+	log.Println("数据库连接 Ready! 👌")
 }
 
 // 准备 Logger
@@ -106,16 +119,11 @@ func setupSetting() error {
 		return err
 	}
 
-	var runMode string
-
 	// 从环境变量中读取一部分配置，优先级大于配置文件，小于启动命令参数
 	// todo 这里可以看看 viper 有没有提供什么简单的从环境变量覆盖配置文件的功能，然后优化一下
 
 	if port := os.Getenv("SERVER_PORT"); port != "" {
 		global.ServerSetting.HttpPort = port
-	}
-	if runMode = os.Getenv("SERVER_MODE"); runMode != "" {
-		global.ServerSetting.RunMode = runMode
 	}
 	if pgDBName := os.Getenv("PG_DBNAME"); pgDBName != "" {
 		global.PGSetting.DBName = pgDBName
@@ -136,9 +144,6 @@ func setupSetting() error {
 	//flag.StringVar(&runMode, "mode", "", "启动模式，debug 或 release")
 	//if port != "" {
 	//	global.ServerSetting.HttpPort = port
-	//}
-	//if runMode != "" {
-	//	global.ServerSetting.RunMode = runMode
 	//}
 
 	// 默认从 yaml 文件中导入进来的时间，单位不是秒，需要转换一下

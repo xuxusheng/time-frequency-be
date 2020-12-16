@@ -2,7 +2,8 @@ package middleware
 
 import (
 	"bytes"
-	"github.com/gin-gonic/gin"
+	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/context"
 	"github.com/xuxusheng/time-frequency-be/global"
 	"github.com/xuxusheng/time-frequency-be/pkg/logger"
 	"time"
@@ -10,7 +11,7 @@ import (
 
 // gin 的上下文无法获取 body 内容，在 gin.ResponseWriter 上再包一层，用来存 body 内容
 type AccessLogWriter struct {
-	gin.ResponseWriter
+	context.ResponseWriter
 	body *bytes.Buffer
 }
 
@@ -22,26 +23,34 @@ func (w AccessLogWriter) Write(p []byte) (int, error) {
 	return w.ResponseWriter.Write(p)
 }
 
-func AccessLog() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func AccessLog() iris.Handler {
+	return func(c iris.Context) {
 		bodyWriter := &AccessLogWriter{
 			body:           bytes.NewBufferString(""),
-			ResponseWriter: c.Writer,
+			ResponseWriter: c.ResponseWriter(),
 		}
-		c.Writer = bodyWriter
+
+		c.ResetResponseWriter(bodyWriter)
 
 		beginTime := time.Now().Unix()
 		c.Next()
 		endTime := time.Now().Unix()
 
 		fields := logger.Fields{
-			"url":      c.Request.URL.RequestURI(),
-			"request":  c.Request.PostForm.Encode(),
+			"url":      c.Request().RequestURI,
+			"request":  c.FormValues(),
 			"response": bodyWriter.body.String(),
 		}
 
 		s := "access log: method: %s, status_code: %d, " + "begin_time: %d, end_time: %d"
-		global.Logger.WithFields(fields).Infof(c, s, c.Request.Method, bodyWriter.Status(), beginTime, endTime)
+		global.Logger.WithFields(fields).Infof(
+			c,
+			s,
+			c.Method(),
+			bodyWriter.StatusCode(),
+			beginTime,
+			endTime,
+		)
 	}
 
 }
