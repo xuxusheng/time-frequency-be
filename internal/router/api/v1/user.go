@@ -10,7 +10,6 @@ import (
 	"github.com/xuxusheng/time-frequency-be/internal/service"
 	"github.com/xuxusheng/time-frequency-be/pkg/app"
 	"github.com/xuxusheng/time-frequency-be/pkg/errcode"
-	"log"
 )
 
 type User struct {
@@ -131,6 +130,22 @@ func (u User) Update(c iris.Context) {
 		return
 	}
 
+	// 解析 token
+	claims := jwt.Get(c).(*model.JWTClaims)
+	if claims.UID != id {
+		// 判断用户是否存在 admin 角色
+		isAdmin := false
+		for _, v := range claims.Roles {
+			if v == model.Admin {
+				isAdmin = true
+			}
+		}
+		if !isAdmin {
+			resp.ToError(errcode.Forbidden.WithMsg("非管理员不允许修改他人用户信息"))
+			return
+		}
+	}
+
 	userSvc := service.NewUserService(c.Request().Context())
 
 	user, cerr := userSvc.Update(id, param.Name, param.Phone)
@@ -179,7 +194,6 @@ func (u User) UpdatePassword(c iris.Context) {
 
 	// 解析 token
 	claims := jwt.Get(c).(*model.JWTClaims)
-	log.Println(claims)
 	if claims.UID != id {
 		// 判断用户是否存在 admin 角色
 		isAdmin := false
