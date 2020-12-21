@@ -25,6 +25,8 @@ jobs:
       # 拉取代码
       - name: 拉取代码
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       # 设置 QEMU
       - name: 设置 QEMU
         uses: docker/setup-qemu-action@v1
@@ -64,6 +66,8 @@ jobs:
     steps:
       - name: 拉取代码
         uses: actions/checkout@v1
+        with:
+          fetch-depth: 0
       - name: 准备 Helm Chart 文件
         run: |
           mv ./_ci/chart ./_ci/${{ env.PROJECT_NAME }}
