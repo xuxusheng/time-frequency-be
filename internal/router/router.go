@@ -61,6 +61,8 @@ func NewApp() *iris.Application {
 		apiV1.Put("/users/{id:uint}", user.Update)
 		// 更新密码
 		apiV1.Put("/users/{id:uint}/password", user.UpdatePassword)
+		// 更新用户角色
+		apiV1.Put("/users/{id:uint}/role", user.UpdateRole)
 		// 获取用户列表
 		apiV1.Get("/users", user.List)
 		// 获取单个用户
