@@ -151,6 +151,15 @@ func (u *UserService) UpdatePassword(id uint, oldPassword, newPassword string) *
 	return nil
 }
 
+func (u *UserService) UpdateRole(id uint, role model.Role) error {
+	userDao := dao.NewUserDao(global.PGEngine)
+	err := userDao.UpdateRole(id, role)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (u *UserService) Get(id uint) (*model.User, error) {
 	userDao := dao.NewUserDao(global.PGEngine)
 

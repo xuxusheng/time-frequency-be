@@ -430,6 +430,47 @@
                     }
                 }
             }
+        },
+        "/api/v1/users/{id}/role": {
+            "put": {
+                "description": "只允许管理员调用，修改用户角色信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "管理员"
+                ],
+                "summary": "修改用户角色（管理员）",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "角色，member 或 admin",
+                        "name": "role",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Resp"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
