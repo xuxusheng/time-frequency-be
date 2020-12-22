@@ -62,21 +62,27 @@ definitions:
   model.User:
     properties:
       created_at:
+        description: 创建时间
         example: "2020-12-09T18:52:41.555+08:00"
         type: string
       id:
+        description: 用户 ID
         example: 1
         type: integer
       name:
+        description: 用户名
         example: xusheng
         type: string
       phone:
+        description: 手机号
         example: "17707272442"
         type: string
       role:
+        description: 用户角色
         example: member
         type: string
       updated_at:
+        description: 更新时间
         example: "2020-12-09T18:52:41.555+08:00"
         type: string
     type: object
@@ -343,6 +349,9 @@ paths:
         required: true
         type: integer
       - description: 角色，member 或 admin
+        enum:
+        - admin
+        - member
         in: body
         name: role
         required: true

@@ -470,6 +470,10 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "enum": [
+                            "admin",
+                            "member"
+                        ],
                         "description": "角色，member 或 admin",
                         "name": "role",
                         "in": "body",
@@ -581,26 +585,32 @@ var doc = `{
             "type": "object",
             "properties": {
                 "created_at": {
+                    "description": "创建时间",
                     "type": "string",
                     "example": "2020-12-09T18:52:41.555+08:00"
                 },
                 "id": {
+                    "description": "用户 ID",
                     "type": "integer",
                     "example": 1
                 },
                 "name": {
+                    "description": "用户名",
                     "type": "string",
                     "example": "xusheng"
                 },
                 "phone": {
+                    "description": "手机号",
                     "type": "string",
                     "example": "17707272442"
                 },
                 "role": {
+                    "description": "用户角色",
                     "type": "string",
                     "example": "member"
                 },
                 "updated_at": {
+                    "description": "更新时间",
                     "type": "string",
                     "example": "2020-12-09T18:52:41.555+08:00"
                 }
