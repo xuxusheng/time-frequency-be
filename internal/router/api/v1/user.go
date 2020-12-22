@@ -229,7 +229,7 @@ type UpdateUserRoleReq struct {
 // @produce json
 // @tags 管理员
 // @param id path int true "用户ID"
-// @param role body string true "角色，member 或 admin"
+// @param role body string true "角色，member 或 admin" Enums(admin, member)
 // @success 200 {object} model.Resp
 // @router /api/v1/users/{id}/role [put]
 func (u User) UpdateRole(c iris.Context) {
