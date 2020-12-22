@@ -218,6 +218,65 @@ func (u User) UpdatePassword(c iris.Context) {
 	resp.ToSuccess(nil)
 }
 
+type UpdateUserRoleReq struct {
+	Role model.Role `json:"role" validate:"required,oneof=admin member"`
+}
+
+// 修改用户角色 godoc
+// @summary 修改用户角色（管理员）
+// @description 只允许管理员调用，修改用户角色信息
+// @accept json
+// @produce json
+// @tags 管理员
+// @param id path int true "用户ID"
+// @param role body string true "角色，member 或 admin"
+// @success 200 {object} model.Resp
+// @router /api/v1/users/{id}/role [put]
+func (u User) UpdateRole(c iris.Context) {
+	param := UpdateUserRoleReq{}
+	resp := app.NewResponse(c)
+
+	id, err := c.Params().GetUint("id")
+	if err != nil {
+		resp.ToError(errcode.BadRequest.WithMsg("id 格式错误"))
+		return
+	}
+
+	// 校验参数
+	valid, errs := app.BindAndValid(c, &param)
+	if !valid {
+		// 参数校验失败
+		global.Logger.Errorf(c, "app.BindAndValid errs: %v", errs)
+		resp.ToError(errcode.BadRequest.WithDetails(errs.Errors()...))
+		return
+	}
+
+	// 解析 token
+	claims := jwt.Get(c).(*model.JWTClaims)
+	if claims.UID != id {
+		// 判断用户是否存在 admin 角色
+		isAdmin := false
+		for _, v := range claims.Roles {
+			if v == model.Admin {
+				isAdmin = true
+			}
+		}
+		if !isAdmin {
+			resp.ToError(errcode.Forbidden.WithMsg("非管理员不允许修改用户角色"))
+			return
+		}
+	}
+
+	// 修改密码
+	userSvc := service.NewUserService(c.Request().Context())
+	err = userSvc.UpdateRole(id, param.Role)
+	if err != nil {
+		resp.ToError(errcode.InternalServerError.WithDetails(err.Error()))
+		return
+	}
+	resp.ToSuccess(nil)
+}
+
 type UserListReq struct {
 	Name  string `form:"name" binding:""`
 	Phone string `form:"phone" binding:""`

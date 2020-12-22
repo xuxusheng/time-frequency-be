@@ -59,7 +59,19 @@ func (u *UserDao) UpdatePassword(id uint, pwd string) error {
 		ID:       id,
 		Password: pwd,
 	}
-	_, err := u.engine.Model(&user).WherePK().Returning("*").UpdateNotZero()
+	_, err := u.engine.Model(&user).WherePK().UpdateNotZero()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (u *UserDao) UpdateRole(id uint, role model.Role) error {
+	user := model.User{
+		ID:   id,
+		Role: string(role),
+	}
+	_, err := u.engine.Model(&user).WherePK().UpdateNotZero()
 	if err != nil {
 		return err
 	}
