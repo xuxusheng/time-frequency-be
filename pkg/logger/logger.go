@@ -151,7 +151,7 @@ func (l *Logger) JSONFormat(level Level, message string) map[string]interface{} 
 
 	data["level"] = level.String()
 	data["time"] = time.Now().Local().UnixNano()
-	data[" message"] = message
+	data["message"] = message
 	data["callers"] = l.callers
 
 	if len(l.fields) > 0 {
