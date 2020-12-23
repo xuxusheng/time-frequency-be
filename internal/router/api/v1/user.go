@@ -16,6 +16,7 @@ import (
 type User struct {
 }
 
+// --- C --- //
 func NewUser() User {
 	return User{}
 }
@@ -60,31 +61,105 @@ func (u User) Create(c iris.Context) {
 	resp.ToSuccess(user)
 }
 
-// 删除用户 godoc
-// @Summary 删除用户
-// @Description 根据 ID 删除用户
-// @Accept json
-// @Produce json
+// --- R --- //
+type UserListReq struct {
+	Name  string `form:"name" binding:""`
+	Phone string `form:"phone" binding:""`
+	Pn    string `form:"pn"`
+	Ps    string `form:"ps"`
+}
+
+// 用户列表 godoc
+// @summary 分页获取用户列表
+// @description 通过 name、phone 字段查询匹配的用户，支持模糊查询、分页
+// @accept json
+// @produce json
 // @tags user
-// @param id path int true "用户ID"
-// @success 200 {object} model.Resp
-// @router /api/v1/users/{id} [delete]
-func (u User) Delete(c iris.Context) {
+// @param name query string false "用户名" default()
+// @param phone query string false "手机号" default()
+// @param pn query string false "第几页" default(1)
+// @param ps query string false "每页记录数量" default(10)
+// @success 200 {object} model.Resp{data=model.DWithP{data=[]model.User}}
+// @router /api/v1/users [get]
+func (u User) List(c iris.Context) {
+	resp := app.NewResponse(c)
+	param := UserListReq{}
+
+	// 校验参数
+	if !app.BindAndValid(c, &param) {
+		return
+	}
+
+	pn := app.GetPn(c)
+	ps := app.GetPs(c)
+	userSvc := service.NewUserService(c.Request().Context())
+
+	users, count, err := userSvc.List(param.Name, param.Phone, &model.Page{Pn: pn, Ps: ps})
+	if err != nil {
+		resp.ToError(errcode.GetUserListFail.WithDetails(err.Error()))
+		return
+	}
+	resp.ToSuccessList(users, count)
+}
+
+// 查询单个用户 godoc
+// @summary 查询单个用户
+// @description 通过 ID 查询单个用户详细信息
+// @accept json
+// @produce json
+// @tags user
+// @param id path string false "用户ID"
+// @success 200 {object} model.Resp{data=model.User}
+// @router /api/v1/users/{id} [get]
+func (u User) Get(c iris.Context) {
 	resp := app.NewResponse(c)
 
 	id, _ := c.Params().GetUint("id")
 
 	userSvc := service.NewUserService(c.Request().Context())
 
-	// 执行删除
-	if err := userSvc.Delete(id); err != nil {
-		resp.ToError(err)
+	user, err := userSvc.Get(id)
+	if err != nil {
+		if errors.Is(err, pg.ErrNoRows) {
+			resp.ToError(errcode.NotFound.WithMsg("用户不存在"))
+			return
+		}
+		resp.ToError(errcode.GetUserFail.WithDetails(err.Error()))
 		return
 	}
-	resp.ToSuccess(nil)
+	resp.ToSuccess(user)
 	return
 }
 
+// 获取当前用户信息 godoc
+// @summary 获取当前用户信息
+// @description 返回当前已登录账号的用户信息
+// @produce json
+// @tags user
+// @success 200 {object} model.Resp{data=model.User}
+// @router /api/v1/users/me [get]
+func (u User) Me(c iris.Context) {
+	resp := app.NewResponse(c)
+
+	// 从 token 中解析 uid 出来
+	claims := jwt.Get(c).(*model.JWTClaims)
+
+	userSvc := service.NewUserService(c.Request().Context())
+
+	user, err := userSvc.Get(claims.UID)
+	if err != nil {
+		if errors.Is(err, pg.ErrNoRows) {
+			resp.ToError(errcode.NotFound.WithMsg("用户不存在"))
+			return
+		}
+		resp.ToError(errcode.GetUserFail.WithDetails(err.Error()))
+		return
+	}
+	resp.ToSuccess(user)
+	return
+}
+
+// --- U --- //
 type UpdateUserReq struct {
 	Name  string `json:"name" validate:"omitempty,alphanum,min=6,max=20"`
 	Phone string `json:"phone" validate:"omitempty,numeric,len=11"`
@@ -218,99 +293,29 @@ func (u User) UpdateRole(c iris.Context) {
 	resp.ToSuccess(nil)
 }
 
-type UserListReq struct {
-	Name  string `form:"name" binding:""`
-	Phone string `form:"phone" binding:""`
-	Pn    string `form:"pn"`
-	Ps    string `form:"ps"`
-}
+// --- D --- //
 
-// 用户列表 godoc
-// @summary 分页获取用户列表
-// @description 通过 name、phone 字段查询匹配的用户，支持模糊查询、分页
-// @accept json
-// @produce json
+// 删除用户 godoc
+// @Summary 删除用户
+// @Description 根据 ID 删除用户
+// @Accept json
+// @Produce json
 // @tags user
-// @param name query string false "用户名" default()
-// @param phone query string false "手机号" default()
-// @param pn query string false "第几页" default(1)
-// @param ps query string false "每页记录数量" default(10)
-// @success 200 {object} model.Resp{data=model.DWithP{data=[]model.User}}
-// @router /api/v1/users [get]
-func (u User) List(c iris.Context) {
-	resp := app.NewResponse(c)
-	param := UserListReq{}
-
-	// 校验参数
-	if !app.BindAndValid(c, &param) {
-		return
-	}
-
-	pn := app.GetPn(c)
-	ps := app.GetPs(c)
-	userSvc := service.NewUserService(c.Request().Context())
-
-	users, count, err := userSvc.List(param.Name, param.Phone, &model.Page{Pn: pn, Ps: ps})
-	if err != nil {
-		resp.ToError(errcode.GetUserListFail.WithDetails(err.Error()))
-		return
-	}
-	resp.ToSuccessList(users, count)
-}
-
-// 查询单个用户 godoc
-// @summary 查询单个用户
-// @description 通过 ID 查询单个用户详细信息
-// @accept json
-// @produce json
-// @tags user
-// @param id path string false "用户ID"
-// @success 200 {object} model.Resp{data=model.User}
-// @router /api/v1/users/{id} [get]
-func (u User) Get(c iris.Context) {
+// @param id path int true "用户ID"
+// @success 200 {object} model.Resp
+// @router /api/v1/users/{id} [delete]
+func (u User) Delete(c iris.Context) {
 	resp := app.NewResponse(c)
 
 	id, _ := c.Params().GetUint("id")
 
 	userSvc := service.NewUserService(c.Request().Context())
 
-	user, err := userSvc.Get(id)
-	if err != nil {
-		if errors.Is(err, pg.ErrNoRows) {
-			resp.ToError(errcode.NotFound.WithMsg("用户不存在"))
-			return
-		}
-		resp.ToError(errcode.GetUserFail.WithDetails(err.Error()))
+	// 执行删除
+	if err := userSvc.Delete(id); err != nil {
+		resp.ToError(err)
 		return
 	}
-	resp.ToSuccess(user)
-	return
-}
-
-// 获取当前用户信息 godoc
-// @summary 获取当前用户信息
-// @description 返回当前已登录账号的用户信息
-// @produce json
-// @tags user
-// @success 200 {object} model.Resp{data=model.User}
-// @router /api/v1/users/me [get]
-func (u User) Me(c iris.Context) {
-	resp := app.NewResponse(c)
-
-	// 从 token 中解析 uid 出来
-	claims := jwt.Get(c).(*model.JWTClaims)
-
-	userSvc := service.NewUserService(c.Request().Context())
-
-	user, err := userSvc.Get(claims.UID)
-	if err != nil {
-		if errors.Is(err, pg.ErrNoRows) {
-			resp.ToError(errcode.NotFound.WithMsg("用户不存在"))
-			return
-		}
-		resp.ToError(errcode.GetUserFail.WithDetails(err.Error()))
-		return
-	}
-	resp.ToSuccess(user)
+	resp.ToSuccess(nil)
 	return
 }
