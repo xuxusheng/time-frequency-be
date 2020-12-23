@@ -9,7 +9,7 @@ import (
 	"github.com/xuxusheng/time-frequency-be/pkg/errcode"
 )
 
-func JWT() iris.Handler {
+func IsLogin() iris.Handler {
 
 	verifier := jwt.NewVerifier(jwt.HS256, global.JWTSetting.Secret)
 

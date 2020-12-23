@@ -8,6 +8,7 @@ import (
 	"github.com/xuxusheng/time-frequency-be/global"
 	"github.com/xuxusheng/time-frequency-be/internal/model"
 	"github.com/xuxusheng/time-frequency-be/internal/service"
+	"github.com/xuxusheng/time-frequency-be/internal/utils"
 	"github.com/xuxusheng/time-frequency-be/pkg/app"
 	"github.com/xuxusheng/time-frequency-be/pkg/errcode"
 )
@@ -25,7 +26,6 @@ type CreateUserReq struct {
 	Password string `json:"password" validate:"required,min=6,max=20"`
 }
 
-// todo，加入一个角色字段，添加时允许选择是 admin 还是 member
 // 创建用户 godoc
 // @summary 创建新用户
 // @Description 创建新用户接口，专供管理平台调用
@@ -43,11 +43,7 @@ func (u User) Create(c iris.Context) {
 	resp := app.NewResponse(c)
 
 	// 校验参数
-	valid, errs := app.BindAndValid(c, &param)
-	if !valid {
-		// 参数校验失败
-		global.Logger.Errorf(c, "app.BindAndValid errs: %v", errs)
-		resp.ToError(errcode.BadRequest.WithDetails(errs.Errors()...))
+	if !app.BindAndValid(c, &param) {
 		return
 	}
 
@@ -76,12 +72,7 @@ func (u User) Create(c iris.Context) {
 func (u User) Delete(c iris.Context) {
 	resp := app.NewResponse(c)
 
-	id, err := c.Params().GetUint("id")
-
-	if err != nil {
-		resp.ToError(errcode.BadRequest.WithMsg("id 格式错误"))
-		return
-	}
+	id, _ := c.Params().GetUint("id")
 
 	userSvc := service.NewUserService(c.Request().Context())
 
@@ -115,18 +106,11 @@ func (u User) Update(c iris.Context) {
 	param := UpdateUserReq{}
 	resp := app.NewResponse(c)
 
-	id, err := c.Params().GetUint("id")
-	if err != nil {
-		resp.ToError(errcode.BadRequest.WithMsg("id 格式错误"))
-		return
-	}
+	// 因为路由直接写的 id:uint，不可能拿到的不是 uint 类型
+	id, _ := c.Params().GetUint("id")
 
 	// 校验参数
-	valid, errs := app.BindAndValid(c, &param)
-	if !valid {
-		// 参数校验失败
-		global.Logger.Errorf(c, "app.BindAndValid errs: %v", errs)
-		resp.ToError(errcode.BadRequest.WithDetails(errs.Errors()...))
+	if !app.BindAndValid(c, &param) {
 		return
 	}
 
@@ -134,12 +118,7 @@ func (u User) Update(c iris.Context) {
 	claims := jwt.Get(c).(*model.JWTClaims)
 	if claims.UID != id {
 		// 判断用户是否存在 admin 角色
-		isAdmin := false
-		for _, v := range claims.Roles {
-			if v == model.Admin {
-				isAdmin = true
-			}
-		}
+		isAdmin := utils.IsAdmin(claims.Roles)
 		if !isAdmin {
 			resp.ToError(errcode.Forbidden.WithMsg("非管理员不允许修改他人用户信息"))
 			return
@@ -177,18 +156,10 @@ func (u User) UpdatePassword(c iris.Context) {
 	param := UpdateUserPasswordReq{}
 	resp := app.NewResponse(c)
 
-	id, err := c.Params().GetUint("id")
-	if err != nil {
-		resp.ToError(errcode.BadRequest.WithMsg("id 格式错误"))
-		return
-	}
+	id, _ := c.Params().GetUint("id")
 
 	// 校验参数
-	valid, errs := app.BindAndValid(c, &param)
-	if !valid {
-		// 参数校验失败
-		global.Logger.Errorf(c, "app.BindAndValid errs: %v", errs)
-		resp.ToError(errcode.BadRequest.WithDetails(errs.Errors()...))
+	if !app.BindAndValid(c, &param) {
 		return
 	}
 
@@ -196,12 +167,7 @@ func (u User) UpdatePassword(c iris.Context) {
 	claims := jwt.Get(c).(*model.JWTClaims)
 	if claims.UID != id {
 		// 判断用户是否存在 admin 角色
-		isAdmin := false
-		for _, v := range claims.Roles {
-			if v == model.Admin {
-				isAdmin = true
-			}
-		}
+		isAdmin := utils.IsAdmin(claims.Roles)
 		if !isAdmin {
 			resp.ToError(errcode.Forbidden.WithMsg("非管理员不允许修改他人密码"))
 			return
@@ -236,40 +202,15 @@ func (u User) UpdateRole(c iris.Context) {
 	param := UpdateUserRoleReq{}
 	resp := app.NewResponse(c)
 
-	id, err := c.Params().GetUint("id")
-	if err != nil {
-		resp.ToError(errcode.BadRequest.WithMsg("id 格式错误"))
-		return
-	}
+	id, _ := c.Params().GetUint("id")
 
 	// 校验参数
-	valid, errs := app.BindAndValid(c, &param)
-	if !valid {
-		// 参数校验失败
-		global.Logger.Errorf(c, "app.BindAndValid errs: %v", errs)
-		resp.ToError(errcode.BadRequest.WithDetails(errs.Errors()...))
+	if !app.BindAndValid(c, &param) {
 		return
 	}
 
-	// 解析 token
-	claims := jwt.Get(c).(*model.JWTClaims)
-	if claims.UID != id {
-		// 判断用户是否存在 admin 角色
-		isAdmin := false
-		for _, v := range claims.Roles {
-			if v == model.Admin {
-				isAdmin = true
-			}
-		}
-		if !isAdmin {
-			resp.ToError(errcode.Forbidden.WithMsg("非管理员不允许修改用户角色"))
-			return
-		}
-	}
-
-	// 修改密码
 	userSvc := service.NewUserService(c.Request().Context())
-	err = userSvc.UpdateRole(id, param.Role)
+	err := userSvc.UpdateRole(id, param.Role)
 	if err != nil {
 		resp.ToError(errcode.InternalServerError.WithDetails(err.Error()))
 		return
@@ -300,14 +241,8 @@ func (u User) List(c iris.Context) {
 	resp := app.NewResponse(c)
 	param := UserListReq{}
 
-	// 这里的 errs 类型不是 errcode 包中定义的 ToError，而是 app 包中定义的 ValidError
-	valid, errs := app.BindAndValid(c, &param)
-	if !valid {
-		// 参数校验失败
-		global.Logger.Errorf(c, "app.BindAndValid errs: %v", errs)
-		resp.ToError(
-			errcode.BadRequest.WithDetails(errs.Errors()...),
-		)
+	// 校验参数
+	if !app.BindAndValid(c, &param) {
 		return
 	}
 
@@ -335,12 +270,7 @@ func (u User) List(c iris.Context) {
 func (u User) Get(c iris.Context) {
 	resp := app.NewResponse(c)
 
-	id, err := c.Params().GetUint("id")
-
-	if err != nil {
-		resp.ToError(errcode.BadRequest.WithMsg("id 格式错误"))
-		return
-	}
+	id, _ := c.Params().GetUint("id")
 
 	userSvc := service.NewUserService(c.Request().Context())
 

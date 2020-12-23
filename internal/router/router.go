@@ -44,6 +44,7 @@ func NewApp() *iris.Application {
 
 	// 业务接口
 	apiV1 := app.Party("/api/v1")
+	isAdmin := middleware.IsAdmin()
 	auth := v1.NewAuth()
 	user := v1.NewUser()
 	{
@@ -52,17 +53,17 @@ func NewApp() *iris.Application {
 		apiV1.Post("/login", auth.Login)
 
 		// ---- 以下接口需要登录才能访问
-		apiV1.Use(middleware.JWT())
+		apiV1.Use(middleware.IsLogin())
 		// 添加用户
 		apiV1.Post("/users", user.Create)
 		// 删除用户
-		apiV1.Delete("/users/{id:uint}", user.Delete)
+		apiV1.Delete("/users/{id:uint}", isAdmin, user.Delete)
 		// 更新用户信息（通用信息字段）
 		apiV1.Put("/users/{id:uint}", user.Update)
 		// 更新密码
 		apiV1.Put("/users/{id:uint}/password", user.UpdatePassword)
 		// 更新用户角色
-		apiV1.Put("/users/{id:uint}/role", user.UpdateRole)
+		apiV1.Put("/users/{id:uint}/role", isAdmin, user.UpdateRole)
 		// 获取用户列表
 		apiV1.Get("/users", user.List)
 		// 获取单个用户
