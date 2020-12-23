@@ -2,10 +2,8 @@ package v1
 
 import (
 	"github.com/kataras/iris/v12"
-	"github.com/xuxusheng/time-frequency-be/global"
 	"github.com/xuxusheng/time-frequency-be/internal/service"
 	"github.com/xuxusheng/time-frequency-be/pkg/app"
-	"github.com/xuxusheng/time-frequency-be/pkg/errcode"
 )
 
 type Auth struct {
@@ -36,11 +34,7 @@ func (a Auth) Login(c iris.Context) {
 	resp := app.NewResponse(c)
 
 	// 校验参数
-	valid, errs := app.BindAndValid(c, &param)
-	if !valid {
-		// 参数校验失败
-		global.Logger.Errorf(c, "app.BindAndValid errs: %v", errs)
-		resp.ToError(errcode.BadRequest.WithDetails(errs.Errors()...))
+	if !app.BindAndValid(c, &param) {
 		return
 	}
 

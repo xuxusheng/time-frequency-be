@@ -4,6 +4,8 @@ import (
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	"github.com/kataras/iris/v12"
+	"github.com/xuxusheng/time-frequency-be/global"
+	"github.com/xuxusheng/time-frequency-be/pkg/errcode"
 	"strings"
 )
 
@@ -30,20 +32,23 @@ func (v ValidErrors) Errors() []string {
 	return errs
 }
 
-func BindAndValid(c iris.Context, v interface{}) (bool, ValidErrors) {
+func BindAndValid(c iris.Context, v interface{}) bool {
 	var errs ValidErrors
 
 	err := c.ReadBody(v)
 
 	if err != nil {
+		resp := NewResponse(c)
 		// 从 ctx 中取出翻译器
 		trans, _ := c.Values().Get("trans").(ut.Translator)
 
 		// 将 ShouldBind 返回的 err 推断为 ValidationErrors，gin 默认使用的是 validator 这个库来做校验
 		verrs, ok := err.(validator.ValidationErrors)
 		if !ok {
-			// 如果没法推断为 validator.ValidationErrors 类型，就直接返回好了，此时 errs 是个空
-			return false, errs
+			// 如果没法推断为 validator.ValidationErrors 类型，就直接返回好了，此时 verrs 是个空
+			global.Logger.Errorf(c, "BindAndValid unknown err: %v", err.Error())
+			resp.ToError(errcode.InternalServerError.WithDetails(err.Error()))
+			return false
 		}
 
 		// verrs.Translate(trans) 返回的 ValidationErrorsTranslations 是一个 map[string]string 结构
@@ -54,7 +59,10 @@ func BindAndValid(c iris.Context, v interface{}) (bool, ValidErrors) {
 				Message: value, // 错误信息
 			})
 		}
-		return false, errs
+
+		// 直接将错误写入 response，外部调用方就不再重复写了
+		resp.ToError(errcode.BadRequest.WithDetails(errs.Errors()...))
+		return false
 	}
-	return true, nil
+	return true
 }
