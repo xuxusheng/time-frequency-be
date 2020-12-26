@@ -78,7 +78,6 @@ jobs:
   deploy:
     name: 部署到集群（开发环境）
     needs:
-      - sonarqube
       - build
     runs-on: ubuntu-latest
     steps:
