@@ -185,3 +185,48 @@ func TestClassDao_Delete(t *testing.T) {
 
 	truncateTable(db)
 }
+
+func TestClassDao_IsNameExist(t *testing.T) {
+	pClasses, _ := prepareClass(t, db)
+	dao := NewClassDao(db)
+
+	t.Run("排除当前班级之后，查找当前班级的班级名", func(t *testing.T) {
+		for _, pClass := range pClasses {
+			is, err := dao.IsNameExist(context.Background(), pClass.Name, pClass.Id)
+			if assert.Nil(t, err) {
+				assert.False(t, is)
+			}
+		}
+	})
+
+	t.Run("排除当前班级之后，查找其他班级的班级名", func(t *testing.T) {
+		for i := 0; i < len(pClasses)-1; i++ {
+			current := pClasses[i]
+			next := pClasses[i+1]
+			is, err := dao.IsNameExist(context.Background(), next.Name, current.Id)
+			if assert.Nil(t, err) {
+				assert.True(t, is)
+			}
+		}
+	})
+
+	t.Run("不排除当前班级，查找班级名", func(t *testing.T) {
+		for _, pClass := range pClasses {
+			is, err := dao.IsNameExist(context.Background(), pClass.Name, 0)
+			if assert.Nil(t, err) {
+				assert.True(t, is)
+			}
+		}
+	})
+
+	t.Run("查找不存在的班级名", func(t *testing.T) {
+		for i := 0; i < 10; i++ {
+			is, err := dao.IsNameExist(context.Background(), time.Now().String(), 0)
+			if assert.Nil(t, err) {
+				assert.False(t, is)
+			}
+		}
+	})
+
+	truncateTable(db)
+}
