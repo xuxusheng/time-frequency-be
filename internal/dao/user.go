@@ -1,0 +1,104 @@
+package dao
+
+import (
+	"context"
+	"github.com/go-pg/pg/v10/orm"
+	"github.com/xuxusheng/time-frequency-be/internal/model"
+	"time"
+)
+
+type IUserDao interface {
+	// 创建用户
+	Create(ctx context.Context, createdBy int, name, phone, email, password string) (*model.User, error)
+	// 获取单个用户
+	Get(ctx context.Context, id int) (*model.User, error)
+	// 更新用户信息
+	Update(ctx context.Context, id int, name, phone, email string) (*model.User, error)
+	// 删除用户
+	Delete(ctx context.Context, id int) error
+	// 用户名是否存在
+	IsNameExist(ctx context.Context, name string, excludeId int) (bool, error)
+	// 手机号是否存在
+	IsPhoneExist(ctx context.Context, phone string, excludeId int) (bool, error)
+	// 邮箱是否存在
+	IsEmailExist(ctx context.Context, email string, excludeId int) (bool, error)
+}
+
+func NewUserDao(db orm.DB) *UserDao {
+	return &UserDao{
+		db: db,
+	}
+}
+
+type UserDao struct {
+	db orm.DB
+}
+
+func (u *UserDao) Create(ctx context.Context, createdBy int, name, phone, email, password string) (*model.User, error) {
+	user := model.User{
+		Name:        name,
+		Phone:       phone,
+		Email:       email,
+		Password:    password,
+		CreatedById: createdBy,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+	_, err := u.db.ModelContext(ctx, &user).Returning("*").Insert()
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (u *UserDao) Get(ctx context.Context, id int) (*model.User, error) {
+	user := model.User{Id: id}
+	err := u.db.ModelContext(ctx, &user).WherePK().Relation("CreatedBy").Select()
+	if err != nil {
+		return nil, err
+	}
+	return &user, err
+}
+
+func (u *UserDao) Update(ctx context.Context, id int, name, phone, email string) (*model.User, error) {
+	user := model.User{Id: id, Name: name, Phone: phone, Email: email, UpdatedAt: time.Now()}
+	_, err := u.db.
+		ModelContext(ctx, &user).
+		Column("name", "phone", "email", "updated_at").
+		WherePK().
+		Returning("*").
+		Update()
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (u *UserDao) Delete(ctx context.Context, id int) error {
+	_, err := u.db.ModelContext(ctx, &model.User{Id: id}).WherePK().Delete()
+	return err
+}
+
+func (u *UserDao) IsNameExist(ctx context.Context, name string, excludeId int) (bool, error) {
+	db := u.db.ModelContext(ctx, &model.User{})
+	if excludeId != 0 {
+		db = db.Where("id != ?", excludeId)
+	}
+	return db.Where("name = ?", name).Exists()
+}
+
+func (u *UserDao) IsPhoneExist(ctx context.Context, phone string, excludeId int) (bool, error) {
+	db := u.db.ModelContext(ctx, &model.User{})
+	if excludeId != 0 {
+		db = db.Where("id != ?", excludeId)
+	}
+	return db.Where("phone = ?", phone).Exists()
+}
+
+func (u *UserDao) IsEmailExist(ctx context.Context, email string, excludeId int) (bool, error) {
+	db := u.db.ModelContext(ctx, &model.User{})
+	if excludeId != 0 {
+		db = db.Where("id != ?", excludeId)
+	}
+	return db.Where("email = ?", email).Exists()
+}
