@@ -7,11 +7,12 @@ import (
 	"time"
 )
 
-type ILearningMaterial interface {
-	Create(ctx context.Context, createdBy, subjectId int, name, description, md5, filePath string) (*model.LearningMaterial, error)
+type ILearningMaterialDao interface {
+	Create(ctx context.Context, createdById, subjectId int, name, description, md5, filePath string) (*model.LearningMaterial, error)
 	Get(ctx context.Context, id int) (*model.LearningMaterial, error)
 	Update(ctx context.Context, id, updatedBy int, name, description string) (*model.LearningMaterial, error)
 	Delete(ctx context.Context, id int) error
+	IsNameExist(ctx context.Context, name string, excludeId int) (bool, error)
 }
 
 func NewLearningMaterialDao(db orm.DB) *LearningMaterialDao {
@@ -68,4 +69,12 @@ func (l LearningMaterialDao) Update(ctx context.Context, id, updatedBy int, name
 func (l LearningMaterialDao) Delete(ctx context.Context, id int) error {
 	_, err := l.db.ModelContext(ctx, &model.LearningMaterial{Id: id}).WherePK().Delete()
 	return err
+}
+
+func (l LearningMaterialDao) IsNameExist(ctx context.Context, name string, excludeId int) (bool, error) {
+	db := l.db.ModelContext(ctx, &model.LearningMaterial{})
+	if excludeId != 0 {
+		db = db.Where("id != ?", excludeId)
+	}
+	return db.Where("name = ?", name).Exists()
 }

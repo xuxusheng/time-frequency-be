@@ -7,11 +7,12 @@ import (
 	"time"
 )
 
-type IClass interface {
-	Create(ctx context.Context, name, description string) (*model.Class, error)
+type IClassDao interface {
+	Create(ctx context.Context, createdById int, name, description string) (*model.Class, error)
 	Get(ctx context.Context, id int) (*model.Class, error)
 	Update(ctx context.Context, id int, name, description string) (*model.Class, error)
 	Delete(ctx context.Context, id int) error
+	IsNameExist(ctx context.Context, name string, excludeId int) (bool, error)
 }
 
 func NewClassDao(db orm.DB) *ClassDao {
@@ -63,4 +64,12 @@ func (c ClassDao) Update(ctx context.Context, id int, name, description string) 
 func (c ClassDao) Delete(ctx context.Context, id int) error {
 	_, err := c.db.ModelContext(ctx, &model.Class{Id: id}).WherePK().Delete()
 	return err
+}
+
+func (c ClassDao) IsNameExist(ctx context.Context, name string, excludeId int) (bool, error) {
+	db := c.db.ModelContext(ctx, &model.Class{})
+	if excludeId != 0 {
+		db = db.Where("id != ?", excludeId)
+	}
+	return db.Where("name = ?", name).Exists()
 }

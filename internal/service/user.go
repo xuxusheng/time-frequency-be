@@ -10,7 +10,7 @@ import (
 type IUserSvc interface {
 	Create(ctx context.Context, createdById int, name, phone, email, password string) (*model.User, error)
 	Get(ctx context.Context, id int) (*model.User, error)
-	Update(ctx context.Context, id int, updatedBy int, name, phone, email string) (*model.User, error)
+	Update(ctx context.Context, id int, name, phone, email string) (*model.User, error)
 	Delete(ctx context.Context, id int) error
 	IsNameExist(ctx context.Context, name string, excludeId int) (bool, error)   // 查询用户名是否被占用
 	IsPhoneExist(ctx context.Context, phone string, excludeId int) (bool, error) // 查询手机号是否被占用
@@ -65,7 +65,7 @@ func (u *UserSvc) Get(ctx context.Context, id int) (*model.User, error) {
 	return u.Dao.Get(ctx, id)
 }
 
-func (u *UserSvc) Update(ctx context.Context, id int, updatedBy int, name, phone, email string) (*model.User, error) {
+func (u *UserSvc) Update(ctx context.Context, id int, name, phone, email string) (*model.User, error) {
 	d := u.Dao
 	// 判断用户名是否被占用
 	is, err := d.IsNameExist(ctx, name, id)
