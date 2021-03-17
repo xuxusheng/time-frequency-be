@@ -41,7 +41,7 @@ func (s SubjectSvc) Create(ctx context.Context, createById int, name, descriptio
 }
 
 func (s SubjectSvc) Get(ctx context.Context, id int) (*model.Subject, error) {
-	return s.Get(ctx, id)
+	return s.Dao.Get(ctx, id)
 }
 
 func (s SubjectSvc) Update(ctx context.Context, id int, name, description string) (*model.Subject, error) {

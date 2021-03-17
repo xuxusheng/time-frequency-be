@@ -136,7 +136,8 @@ func TestUserDao_Update(t *testing.T) {
 
 	t.Run("修改一个不存在的用户", func(t *testing.T) {
 		for i := 0; i < 10; i++ {
-			user, err := dao.Update(context.Background(), rand.Intn(100)*10000, "", "", "")
+			s := time.Now().String()
+			user, err := dao.Update(context.Background(), rand.Intn(100)*10000, s, s, s)
 			assert.Equal(t, pg.ErrNoRows, err)
 			assert.Nil(t, user)
 		}

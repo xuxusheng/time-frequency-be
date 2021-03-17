@@ -15,12 +15,12 @@ type ILearningMaterialSvc interface {
 	IsNameExist(ctx context.Context, name string, excludeId int) (bool, error)
 }
 
-func NewLearningMaterialSvc(dao dao.LearningMaterialDao) *LearningMaterialSvc {
+func NewLearningMaterialSvc(dao dao.ILearningMaterialDao) *LearningMaterialSvc {
 	return &LearningMaterialSvc{Dao: dao}
 }
 
 type LearningMaterialSvc struct {
-	Dao dao.LearningMaterialDao
+	Dao dao.ILearningMaterialDao
 }
 
 func (l LearningMaterialSvc) Create(ctx context.Context, createdById, subjectId int, name, description, md5, filePath string) (*model.LearningMaterial, error) {
