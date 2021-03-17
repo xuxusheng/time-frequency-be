@@ -14,11 +14,11 @@ import (
 // 准备班级数据
 func prepareClass(t *testing.T, db *pg.DB) ([]*model.Class, []*model.User) {
 	users, err := testdb.SeedUser(db)
-	if err != nil {
+	if err != nil || len(users) == 0 {
 		t.Fatalf("准备用户数据失败：%v", err)
 	}
 	classes, err := testdb.SeedClass(db, users)
-	if err != nil && len(classes) == 0 {
+	if err != nil || len(classes) == 0 {
 		t.Fatalf("准备班级数据失败：%v", err)
 	}
 	return classes, users

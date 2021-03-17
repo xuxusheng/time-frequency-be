@@ -13,17 +13,17 @@ import (
 
 func prepareLearningMaterial(t *testing.T, db *pg.DB) ([]*model.LearningMaterial, []*model.Subject, []*model.User) {
 	users, err := testdb.SeedUser(db)
-	if err != nil {
+	if err != nil || len(users) == 0 {
 		t.Fatalf("准备用户数据失败：%v", err)
 	}
 
 	subjects, err := testdb.SeedSubject(db, users)
-	if err != nil {
+	if err != nil || len(subjects) == 0 {
 		t.Fatalf("准备科目数据失败：%v", err)
 	}
 
 	learningMaterials, err := testdb.SeedLearningMaterial(db, users, subjects)
-	if err != nil {
+	if err != nil || len(learningMaterials) == 0 {
 		t.Fatalf("准备学习资料数据失败：%v", err)
 	}
 	return learningMaterials, subjects, users

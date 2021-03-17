@@ -10,7 +10,7 @@ import (
 type IClassSvc interface {
 	Create(ctx context.Context, createdById int, name, description string) (*model.Class, error)
 	Get(ctx context.Context, id int) (*model.User, error)
-	Update(ctx context.Context, id, updatedBy int, name, description string) (*model.Class, error)
+	Update(ctx context.Context, id int, name, description string) (*model.Class, error)
 	Delete(ctx context.Context, id int) error
 	IsNameExist(ctx context.Context, name string, excludeId int) (bool, error)
 }
@@ -42,11 +42,11 @@ func (c ClassSvc) Create(ctx context.Context, createdById int, name, description
 	return class, nil
 }
 
-func (c ClassSvc) Get(ctx context.Context, id int) (*model.User, error) {
-	return c.Get(ctx, id)
+func (c ClassSvc) Get(ctx context.Context, id int) (*model.Class, error) {
+	return c.Dao.Get(ctx, id)
 }
 
-func (c ClassSvc) Update(ctx context.Context, id, updatedBy int, name, description string) (*model.Class, error) {
+func (c ClassSvc) Update(ctx context.Context, id int, name, description string) (*model.Class, error) {
 	d := c.Dao
 	// 判断班级名称是否已被占用
 	is, err := d.IsNameExist(ctx, name, id)
