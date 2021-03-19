@@ -30,8 +30,9 @@ func TestClassSvc_Create(t *testing.T) {
 	t.Run("班级名称重复", func(t *testing.T) {
 		for _, pClass := range pClasses {
 			createdById := pUsers[rand.Intn(len(pUsers))].Id
-			_, err := svc.Create(context.Background(), createdById, pClass.Name, time.Now().String())
+			class, err := svc.Create(context.Background(), createdById, pClass.Name, time.Now().String())
 			assert.EqualError(t, err, "班级名称已存在")
+			assert.Nil(t, class)
 		}
 	})
 
@@ -42,15 +43,16 @@ func TestClassSvc_Create(t *testing.T) {
 			desc := s + "desc"
 			createdById := pUsers[rand.Intn(len(pUsers))].Id
 			t.Run("名称为空", func(t *testing.T) {
-				_, err := svc.Create(context.Background(), createdById, "", desc)
+				class, err := svc.Create(context.Background(), createdById, "", desc)
 				assert.NotNil(t, err)
+				assert.Nil(t, class)
 			})
 			t.Run("描述为空", func(t *testing.T) {
 				class, err := svc.Create(context.Background(), createdById, name, "")
 				if assert.Nil(t, err) {
 					assert.Equal(t, name, class.Name)
-					assert.Equal(t, createdById, class.CreatedById)
 					assert.Zero(t, class.Description)
+					assert.Equal(t, createdById, class.CreatedById)
 				}
 			})
 		}
@@ -78,7 +80,7 @@ func TestClassSvc_Get(t *testing.T) {
 	pClasses, _ := prepareClass(t, db)
 	svc := NewClassSvc(classDao)
 
-	t.Run("正常读取", func(t *testing.T) {
+	t.Run("正常获取", func(t *testing.T) {
 		for _, pClass := range pClasses {
 			class, err := svc.Get(context.Background(), pClass.Id)
 			if assert.Nil(t, err) {
