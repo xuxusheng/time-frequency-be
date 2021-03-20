@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/xuxusheng/time-frequency-be/internal/infrastructure/testdb"
 	"github.com/xuxusheng/time-frequency-be/internal/model"
+	"github.com/xuxusheng/time-frequency-be/internal/pkg/cerror"
 	"math/rand"
 	"testing"
 	"time"
@@ -33,15 +34,15 @@ func TestUserSvc_Create(t *testing.T) {
 			pwd := s + "password"
 			t.Run("用户名重复", func(t *testing.T) {
 				_, err := svc.Create(context.Background(), 1, pUser.Name, phone, email, pwd)
-				assert.EqualError(t, err, "用户名已存在")
+				assert.Equal(t, cerror.BadRequest.WithMsg("用户名已存在"), err)
 			})
 			t.Run("手机号重复", func(t *testing.T) {
 				_, err := svc.Create(context.Background(), 1, name, pUser.Phone, email, pwd)
-				assert.EqualError(t, err, "手机号已存在")
+				assert.Equal(t, cerror.BadRequest.WithMsg("手机号已存在"), err)
 			})
 			t.Run("邮箱重复", func(t *testing.T) {
 				_, err := svc.Create(context.Background(), 1, name, phone, pUser.Email, pwd)
-				assert.EqualError(t, err, "邮箱已存在")
+				assert.Equal(t, cerror.BadRequest.WithMsg("邮箱已存在"), err)
 			})
 		}
 	})

@@ -5,6 +5,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/xuxusheng/time-frequency-be/internal/dao"
 	"github.com/xuxusheng/time-frequency-be/internal/model"
+	"github.com/xuxusheng/time-frequency-be/internal/pkg/cerror"
 )
 
 type IUser interface {
@@ -33,7 +34,7 @@ func (u *User) Create(ctx context.Context, createdById int, name, phone, email, 
 		return nil, err
 	}
 	if is {
-		return nil, errors.New("用户名已存在")
+		return nil, cerror.BadRequest.WithMsg("用户名已存在")
 	}
 
 	// 判断手机号是否已存在
@@ -42,7 +43,7 @@ func (u *User) Create(ctx context.Context, createdById int, name, phone, email, 
 		return nil, err
 	}
 	if is {
-		return nil, errors.New("手机号已存在")
+		return nil, cerror.BadRequest.WithMsg("手机号已存在")
 	}
 
 	// 判断邮箱是否已存在
@@ -51,7 +52,7 @@ func (u *User) Create(ctx context.Context, createdById int, name, phone, email, 
 		return nil, err
 	}
 	if is {
-		return nil, errors.New("邮箱已存在")
+		return nil, cerror.BadRequest.WithMsg("邮箱已存在")
 	}
 
 	user, err := d.Create(ctx, createdById, name, phone, email, password)

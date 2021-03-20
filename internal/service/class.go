@@ -5,6 +5,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/xuxusheng/time-frequency-be/internal/dao"
 	"github.com/xuxusheng/time-frequency-be/internal/model"
+	"github.com/xuxusheng/time-frequency-be/internal/pkg/cerror"
 )
 
 type IClass interface {
@@ -32,7 +33,7 @@ func (c Class) Create(ctx context.Context, createdById int, name, description st
 		return nil, err
 	}
 	if is {
-		return nil, errors.New("班级名称已存在")
+		return nil, cerror.BadRequest.WithMsg("班级名称已存在")
 	}
 
 	class, err := d.Create(ctx, createdById, name, description)

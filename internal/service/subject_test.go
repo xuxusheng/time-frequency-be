@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/xuxusheng/time-frequency-be/internal/infrastructure/testdb"
 	"github.com/xuxusheng/time-frequency-be/internal/model"
+	"github.com/xuxusheng/time-frequency-be/internal/pkg/cerror"
 	"math/rand"
 	"testing"
 	"time"
@@ -31,7 +32,7 @@ func TestSubjectSvc_Create(t *testing.T) {
 		for _, pSubject := range pSubjects {
 			createdById := pUsers[rand.Intn(len(pUsers))].Id
 			_, err := svc.Create(context.Background(), createdById, pSubject.Name, time.Now().String())
-			assert.EqualError(t, err, "科目名称已存在")
+			assert.Equal(t, cerror.BadRequest.WithMsg("科目名称已存在"), err)
 		}
 	})
 
