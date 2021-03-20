@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type ISubjectDao interface {
+type ISubject interface {
 	Create(ctx context.Context, createdById int, name, description string) (*model.Subject, error)
 	Get(ctx context.Context, id int) (*model.Subject, error)
 	Update(ctx context.Context, id int, name, description string) (*model.Subject, error)
@@ -16,15 +16,15 @@ type ISubjectDao interface {
 	IsNameExist(ctx context.Context, name string, excludeId int) (bool, error)
 }
 
-func NewSubjectDao(db orm.DB) *SubjectDao {
-	return &SubjectDao{db: db}
+func NewSubject(db orm.DB) *Subject {
+	return &Subject{db: db}
 }
 
-type SubjectDao struct {
+type Subject struct {
 	db orm.DB
 }
 
-func (s SubjectDao) Create(ctx context.Context, createdById int, name, description string) (*model.Subject, error) {
+func (s Subject) Create(ctx context.Context, createdById int, name, description string) (*model.Subject, error) {
 	subject := model.Subject{
 		Name:        name,
 		Description: description,
@@ -39,7 +39,7 @@ func (s SubjectDao) Create(ctx context.Context, createdById int, name, descripti
 	return &subject, nil
 }
 
-func (s SubjectDao) Get(ctx context.Context, id int) (*model.Subject, error) {
+func (s Subject) Get(ctx context.Context, id int) (*model.Subject, error) {
 	subject := model.Subject{Id: id}
 	err := s.db.ModelContext(ctx, &subject).WherePK().Select()
 	if err != nil {
@@ -48,7 +48,7 @@ func (s SubjectDao) Get(ctx context.Context, id int) (*model.Subject, error) {
 	return &subject, err
 }
 
-func (s SubjectDao) Update(ctx context.Context, id int, name, description string) (*model.Subject, error) {
+func (s Subject) Update(ctx context.Context, id int, name, description string) (*model.Subject, error) {
 	subject := model.Subject{
 		Id: id, Name: name, Description: description, UpdatedAt: time.Now(),
 	}
@@ -59,12 +59,12 @@ func (s SubjectDao) Update(ctx context.Context, id int, name, description string
 	return &subject, err
 }
 
-func (s SubjectDao) Delete(ctx context.Context, id int) error {
+func (s Subject) Delete(ctx context.Context, id int) error {
 	_, err := s.db.ModelContext(ctx, &model.Subject{Id: id}).WherePK().Delete()
 	return err
 }
 
-func (s SubjectDao) IsNameExist(ctx context.Context, name string, excludeId int) (bool, error) {
+func (s Subject) IsNameExist(ctx context.Context, name string, excludeId int) (bool, error) {
 	db := s.db.ModelContext(ctx, &model.Subject{})
 	if excludeId != 0 {
 		db = db.Where("id != ?", excludeId)

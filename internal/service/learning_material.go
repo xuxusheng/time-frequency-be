@@ -7,7 +7,7 @@ import (
 	"github.com/xuxusheng/time-frequency-be/internal/model"
 )
 
-type ILearningMaterialSvc interface {
+type ILearningMaterial interface {
 	Create(ctx context.Context, createdById, subjectId int, name, description, md5, filePath string) (*model.LearningMaterial, error)
 	Get(ctx context.Context, id int) (*model.LearningMaterial, error)
 	Update(ctx context.Context, id, updatedById int, name, description string) (*model.LearningMaterial, error)
@@ -15,15 +15,15 @@ type ILearningMaterialSvc interface {
 	IsNameExist(ctx context.Context, name string, excludeId int) (bool, error)
 }
 
-func NewLearningMaterialSvc(dao dao.ILearningMaterialDao) *LearningMaterialSvc {
-	return &LearningMaterialSvc{Dao: dao}
+func NewLearningMaterial(dao dao.ILearningMaterial) *LearningMaterial {
+	return &LearningMaterial{Dao: dao}
 }
 
-type LearningMaterialSvc struct {
-	Dao dao.ILearningMaterialDao
+type LearningMaterial struct {
+	Dao dao.ILearningMaterial
 }
 
-func (l LearningMaterialSvc) Create(ctx context.Context, createdById, subjectId int, name, description, md5, filePath string) (*model.LearningMaterial, error) {
+func (l LearningMaterial) Create(ctx context.Context, createdById, subjectId int, name, description, md5, filePath string) (*model.LearningMaterial, error) {
 	d := l.Dao
 	// 判断资料名称是否存在
 	is, err := d.IsNameExist(ctx, name, 0)
@@ -40,11 +40,11 @@ func (l LearningMaterialSvc) Create(ctx context.Context, createdById, subjectId 
 	return lm, nil
 }
 
-func (l LearningMaterialSvc) Get(ctx context.Context, id int) (*model.LearningMaterial, error) {
+func (l LearningMaterial) Get(ctx context.Context, id int) (*model.LearningMaterial, error) {
 	return l.Dao.Get(ctx, id)
 }
 
-func (l LearningMaterialSvc) Update(ctx context.Context, id, updatedById int, name, description string) (*model.LearningMaterial, error) {
+func (l LearningMaterial) Update(ctx context.Context, id, updatedById int, name, description string) (*model.LearningMaterial, error) {
 	d := l.Dao
 	// 判断资料名称是否存在
 	is, err := d.IsNameExist(ctx, name, id)
@@ -61,10 +61,10 @@ func (l LearningMaterialSvc) Update(ctx context.Context, id, updatedById int, na
 	return lm, nil
 }
 
-func (l LearningMaterialSvc) Delete(ctx context.Context, id int) error {
+func (l LearningMaterial) Delete(ctx context.Context, id int) error {
 	return l.Dao.Delete(ctx, id)
 }
 
-func (l LearningMaterialSvc) IsNameExist(ctx context.Context, name string, excludeId int) (bool, error) {
+func (l LearningMaterial) IsNameExist(ctx context.Context, name string, excludeId int) (bool, error) {
 	return l.Dao.IsNameExist(ctx, name, excludeId)
 }

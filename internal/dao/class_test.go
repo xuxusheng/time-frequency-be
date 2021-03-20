@@ -26,7 +26,7 @@ func prepareClass(t *testing.T, db *pg.DB) ([]*model.Class, []*model.User) {
 
 func TestClassDao_Create(t *testing.T) {
 	pClasses, pUsers := prepareClass(t, db)
-	dao := NewClassDao(db)
+	dao := NewClass(db)
 
 	createdById := pUsers[0].Id
 
@@ -77,7 +77,7 @@ func TestClassDao_Create(t *testing.T) {
 
 func TestClassDao_Get(t *testing.T) {
 	pClasses, _ := prepareClass(t, db)
-	dao := NewClassDao(db)
+	dao := NewClass(db)
 
 	t.Run("正常获取", func(t *testing.T) {
 		for _, pClass := range pClasses {
@@ -101,7 +101,7 @@ func TestClassDao_Get(t *testing.T) {
 
 func TestClassDao_Update(t *testing.T) {
 	pClasses, _ := prepareClass(t, db)
-	dao := NewClassDao(db)
+	dao := NewClass(db)
 
 	t.Run("班级名称重复", func(t *testing.T) {
 		for i := 0; i < len(pClasses)-1; i++ {
@@ -159,7 +159,7 @@ func TestClassDao_Update(t *testing.T) {
 
 func TestClassDao_Delete(t *testing.T) {
 	pClasses, _ := prepareClass(t, db)
-	dao := NewClassDao(db)
+	dao := NewClass(db)
 
 	t.Run("正常删除", func(t *testing.T) {
 		at := assert.New(t)
@@ -188,7 +188,7 @@ func TestClassDao_Delete(t *testing.T) {
 
 func TestClassDao_IsNameExist(t *testing.T) {
 	pClasses, _ := prepareClass(t, db)
-	dao := NewClassDao(db)
+	dao := NewClass(db)
 
 	t.Run("排除当前班级之后，查找当前班级的班级名", func(t *testing.T) {
 		for _, pClass := range pClasses {

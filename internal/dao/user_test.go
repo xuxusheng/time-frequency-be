@@ -22,7 +22,7 @@ func prepareUser(t *testing.T, db *pg.DB) []*model.User {
 
 func TestUserDao_Create(t *testing.T) {
 	pUsers := prepareUser(t, db)
-	dao := NewUserDao(db)
+	dao := NewUser(db)
 
 	t.Run("正常创建", func(t *testing.T) {
 		at := assert.New(t)
@@ -69,7 +69,7 @@ func TestUserDao_Create(t *testing.T) {
 
 func TestUserDao_Get(t *testing.T) {
 	pUsers := prepareUser(t, db)
-	dao := NewUserDao(db)
+	dao := NewUser(db)
 
 	t.Run("正常获取", func(t *testing.T) {
 		for _, pUser := range pUsers {
@@ -94,7 +94,7 @@ func TestUserDao_Get(t *testing.T) {
 
 func TestUserDao_Update(t *testing.T) {
 	pUsers := prepareUser(t, db)
-	dao := NewUserDao(db)
+	dao := NewUser(db)
 
 	t.Run("用户名、手机号或邮箱重复", func(t *testing.T) {
 		for i := 0; i < len(pUsers)-1; i++ {
@@ -168,7 +168,7 @@ func TestUserDao_Update(t *testing.T) {
 func TestUserDao_Delete(t *testing.T) {
 
 	pUsers := prepareUser(t, db)
-	dao := NewUserDao(db)
+	dao := NewUser(db)
 
 	t.Run("正常删除", func(t *testing.T) {
 		at := assert.New(t)
@@ -193,7 +193,7 @@ func TestUserDao_Delete(t *testing.T) {
 
 func TestUserDao_IsNameExist(t *testing.T) {
 	pUsers := prepareUser(t, db)
-	dao := NewUserDao(db)
+	dao := NewUser(db)
 
 	t.Run("排除当前用户之后，查找当前用户的用户名", func(t *testing.T) {
 		for _, pUser := range pUsers {
@@ -238,7 +238,7 @@ func TestUserDao_IsNameExist(t *testing.T) {
 
 func TestUserDao_IsPhoneExist(t *testing.T) {
 	pUsers := prepareUser(t, db)
-	dao := NewUserDao(db)
+	dao := NewUser(db)
 
 	t.Run("排除当前用户之后，查找当前用户的手机号", func(t *testing.T) {
 		for _, pUser := range pUsers {
@@ -283,7 +283,7 @@ func TestUserDao_IsPhoneExist(t *testing.T) {
 
 func TestUserDao_IsEmailExist(t *testing.T) {
 	pUsers := prepareUser(t, db)
-	dao := NewUserDao(db)
+	dao := NewUser(db)
 
 	t.Run("排除当前用户之后，查找当前用户的邮箱", func(t *testing.T) {
 		for _, pUser := range pUsers {
