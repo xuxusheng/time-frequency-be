@@ -62,13 +62,24 @@ func New(code int, msg string, statusCode ...int) *Error {
 }
 
 func (e *Error) Error() string {
-	return fmt.Sprintf(
-		"错误码：%d，错误信息：%s，错误详情：%s，错误Debug信息：%s",
-		e.Code(),
-		e.Msg(),
-		strings.Join(e.Details(), ";"),
-		strings.Join(e.Debugs(), ";"),
-	)
+	//s := "错误码：%d，错误信息：%s"
+
+	s := fmt.Sprintf("错误码：%d，错误信息：%s", e.Code(), e.Msg())
+
+	if len(e.Details()) > 0 {
+		s += fmt.Sprintf("，错误详情：%s", strings.Join(e.Details(), ";"))
+	}
+	if len(e.Debugs()) > 0 {
+		s += fmt.Sprintf("，错误Debug信息：%s", strings.Join(e.Debugs(), ";"))
+	}
+	//return fmt.Sprintf(
+	//	s,
+	//	e.Code(),
+	//	e.Msg(),
+	//	strings.Join(e.Details(), ";"),
+	//	strings.Join(e.Debugs(), ";"),
+	//)
+	return s
 }
 
 func (e *Error) Code() int {

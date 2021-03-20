@@ -5,6 +5,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/xuxusheng/time-frequency-be/internal/dao"
 	"github.com/xuxusheng/time-frequency-be/internal/model"
+	"github.com/xuxusheng/time-frequency-be/internal/pkg/cerror"
 )
 
 type ISubject interface {
@@ -31,7 +32,7 @@ func (s Subject) Create(ctx context.Context, createById int, name, description s
 		return nil, err
 	}
 	if is {
-		return nil, errors.New("科目名称已存在")
+		return nil, cerror.BadRequest.WithMsg("科目名称已存在")
 	}
 	subject, err := d.Create(ctx, createById, name, description)
 	if err != nil {

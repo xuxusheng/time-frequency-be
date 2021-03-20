@@ -5,6 +5,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/xuxusheng/time-frequency-be/internal/dao"
 	"github.com/xuxusheng/time-frequency-be/internal/model"
+	"github.com/xuxusheng/time-frequency-be/internal/pkg/cerror"
 )
 
 type ILearningMaterial interface {
@@ -31,7 +32,7 @@ func (l LearningMaterial) Create(ctx context.Context, createdById, subjectId int
 		return nil, err
 	}
 	if is {
-		return nil, errors.New("资料名称已存在")
+		return nil, cerror.BadRequest.WithMsg("资料名称已存在")
 	}
 	lm, err := d.Create(ctx, createdById, subjectId, name, description, md5, filePath)
 	if err != nil {
