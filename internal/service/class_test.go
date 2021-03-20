@@ -25,7 +25,7 @@ func prepareClass(t *testing.T, db *pg.DB) ([]*model.Class, []*model.User) {
 
 func TestClassSvc_Create(t *testing.T) {
 	pClasses, pUsers := prepareClass(t, db)
-	svc := NewClassSvc(classDao)
+	svc := NewClass(classDao)
 
 	t.Run("班级名称重复", func(t *testing.T) {
 		for _, pClass := range pClasses {
@@ -78,7 +78,7 @@ func TestClassSvc_Create(t *testing.T) {
 
 func TestClassSvc_Get(t *testing.T) {
 	pClasses, _ := prepareClass(t, db)
-	svc := NewClassSvc(classDao)
+	svc := NewClass(classDao)
 
 	t.Run("正常获取", func(t *testing.T) {
 		for _, pClass := range pClasses {
@@ -102,7 +102,7 @@ func TestClassSvc_Get(t *testing.T) {
 
 func TestClassSvc_Update(t *testing.T) {
 	pClasses, _ := prepareClass(t, db)
-	svc := NewClassSvc(classDao)
+	svc := NewClass(classDao)
 
 	t.Run("班级名称重复", func(t *testing.T) {
 		for i := 0; i < len(pClasses)-1; i++ {
@@ -150,7 +150,7 @@ func TestClassSvc_Update(t *testing.T) {
 
 func TestClassSvc_Delete(t *testing.T) {
 	pClasses, _ := prepareClass(t, db)
-	svc := NewClassSvc(classDao)
+	svc := NewClass(classDao)
 
 	t.Run("正常删除", func(t *testing.T) {
 		for _, pClass := range pClasses {
@@ -176,7 +176,7 @@ func TestClassSvc_Delete(t *testing.T) {
 
 func TestClassSvc_IsNameExist(t *testing.T) {
 	pClasses, _ := prepareClass(t, db)
-	svc := NewClassSvc(classDao)
+	svc := NewClass(classDao)
 
 	t.Run("排除当前班级后，查找当前班级的名称", func(t *testing.T) {
 		for _, pClass := range pClasses {

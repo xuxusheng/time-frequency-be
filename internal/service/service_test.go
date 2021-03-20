@@ -12,10 +12,10 @@ import (
 )
 
 var db *pg.DB
-var userDao *dao.UserDao
-var subjectDao *dao.SubjectDao
-var classDao *dao.ClassDao
-var lmDao *dao.LearningMaterialDao
+var userDao *dao.User
+var subjectDao *dao.Subject
+var classDao *dao.Class
+var lmDao *dao.LearningMaterial
 
 func TestMain(m *testing.M) {
 	setup()
@@ -33,10 +33,10 @@ func setup() {
 	if err != nil {
 		log.Fatalf("数据库初始化连接失败：%v", err)
 	}
-	userDao = dao.NewUserDao(db)
-	subjectDao = dao.NewSubjectDao(db)
-	classDao = dao.NewClassDao(db)
-	lmDao = dao.NewLearningMaterialDao(db)
+	userDao = dao.NewUser(db)
+	subjectDao = dao.NewSubject(db)
+	classDao = dao.NewClass(db)
+	lmDao = dao.NewLearningMaterial(db)
 
 	err = testdb.Truncate(db)
 	if err != nil {

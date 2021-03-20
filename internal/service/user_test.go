@@ -22,7 +22,7 @@ func prepareUser(t *testing.T, db *pg.DB) []*model.User {
 func TestUserSvc_Create(t *testing.T) {
 
 	pUsers := prepareUser(t, db)
-	svc := NewUserSvc(userDao)
+	svc := NewUser(userDao)
 
 	t.Run("用户名、手机号或邮箱重复", func(t *testing.T) {
 		for _, pUser := range pUsers {
@@ -95,7 +95,7 @@ func TestUserSvc_Create(t *testing.T) {
 func TestUserSvc_Get(t *testing.T) {
 
 	pUsers := prepareUser(t, db)
-	svc := NewUserSvc(userDao)
+	svc := NewUser(userDao)
 
 	t.Run("正常获取", func(t *testing.T) {
 		for _, pUser := range pUsers {
@@ -119,7 +119,7 @@ func TestUserSvc_Get(t *testing.T) {
 
 func TestUserSvc_Update(t *testing.T) {
 	pUsers := prepareUser(t, db)
-	svc := NewUserSvc(userDao)
+	svc := NewUser(userDao)
 	t.Run("用户名、手机号或邮箱重复", func(t *testing.T) {
 		for i, pUser := range pUsers {
 			if i == len(pUsers)-1 {
@@ -203,7 +203,7 @@ func TestUserSvc_Update(t *testing.T) {
 
 func TestUserSvc_Delete(t *testing.T) {
 	pUsers := prepareUser(t, db)
-	svc := NewUserSvc(userDao)
+	svc := NewUser(userDao)
 
 	t.Run("正常删除", func(t *testing.T) {
 		for _, pUser := range pUsers {
@@ -227,7 +227,7 @@ func TestUserSvc_Delete(t *testing.T) {
 
 func TestUserSvc_IsNameExist(t *testing.T) {
 	pUsers := prepareUser(t, db)
-	svc := NewUserSvc(userDao)
+	svc := NewUser(userDao)
 
 	t.Run("排除当前用户之后，查找当前用户的用户名", func(t *testing.T) {
 		for _, pUser := range pUsers {
@@ -272,7 +272,7 @@ func TestUserSvc_IsNameExist(t *testing.T) {
 
 func TestUserSvc_IsPhoneExist(t *testing.T) {
 	pUsers := prepareUser(t, db)
-	svc := NewUserSvc(userDao)
+	svc := NewUser(userDao)
 
 	t.Run("排除当前用户之后，查找当前用户的手机号", func(t *testing.T) {
 		for _, pUser := range pUsers {
@@ -317,7 +317,7 @@ func TestUserSvc_IsPhoneExist(t *testing.T) {
 
 func TestUserSvc_IsEmailExist(t *testing.T) {
 	pUsers := prepareUser(t, db)
-	svc := NewUserSvc(userDao)
+	svc := NewUser(userDao)
 
 	t.Run("排除当前用户之后，查找当前用户的邮箱", func(t *testing.T) {
 		for _, pUser := range pUsers {

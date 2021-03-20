@@ -7,7 +7,7 @@ import (
 	"github.com/xuxusheng/time-frequency-be/internal/model"
 )
 
-type IUserSvc interface {
+type IUser interface {
 	Create(ctx context.Context, createdById int, name, phone, email, password string) (*model.User, error)
 	Get(ctx context.Context, id int) (*model.User, error)
 	Update(ctx context.Context, id int, name, phone, email string) (*model.User, error)
@@ -17,15 +17,15 @@ type IUserSvc interface {
 	IsEmailExist(ctx context.Context, email string, excludeId int) (bool, error) // 查询邮箱是否被占用
 }
 
-func NewUserSvc(dao dao.IUserDao) *UserSvc {
-	return &UserSvc{Dao: dao}
+func NewUser(dao dao.IUser) *User {
+	return &User{Dao: dao}
 }
 
-type UserSvc struct {
-	Dao dao.IUserDao
+type User struct {
+	Dao dao.IUser
 }
 
-func (u *UserSvc) Create(ctx context.Context, createdById int, name, phone, email, password string) (*model.User, error) {
+func (u *User) Create(ctx context.Context, createdById int, name, phone, email, password string) (*model.User, error) {
 	d := u.Dao
 	// 判断用户名是否已存在
 	is, err := d.IsNameExist(ctx, name, 0)
@@ -61,11 +61,11 @@ func (u *UserSvc) Create(ctx context.Context, createdById int, name, phone, emai
 	return user, nil
 }
 
-func (u *UserSvc) Get(ctx context.Context, id int) (*model.User, error) {
+func (u *User) Get(ctx context.Context, id int) (*model.User, error) {
 	return u.Dao.Get(ctx, id)
 }
 
-func (u *UserSvc) Update(ctx context.Context, id int, name, phone, email string) (*model.User, error) {
+func (u *User) Update(ctx context.Context, id int, name, phone, email string) (*model.User, error) {
 	d := u.Dao
 	// 判断用户名是否被占用
 	is, err := d.IsNameExist(ctx, name, id)
@@ -97,18 +97,18 @@ func (u *UserSvc) Update(ctx context.Context, id int, name, phone, email string)
 	return user, nil
 }
 
-func (u *UserSvc) Delete(ctx context.Context, id int) error {
+func (u *User) Delete(ctx context.Context, id int) error {
 	return u.Dao.Delete(ctx, id)
 }
 
-func (u *UserSvc) IsNameExist(ctx context.Context, name string, excludeId int) (bool, error) {
+func (u *User) IsNameExist(ctx context.Context, name string, excludeId int) (bool, error) {
 	return u.Dao.IsNameExist(ctx, name, excludeId)
 }
 
-func (u *UserSvc) IsPhoneExist(ctx context.Context, phone string, excludeId int) (bool, error) {
+func (u *User) IsPhoneExist(ctx context.Context, phone string, excludeId int) (bool, error) {
 	return u.Dao.IsPhoneExist(ctx, phone, excludeId)
 }
 
-func (u *UserSvc) IsEmailExist(ctx context.Context, email string, excludeId int) (bool, error) {
+func (u *User) IsEmailExist(ctx context.Context, email string, excludeId int) (bool, error) {
 	return u.Dao.IsEmailExist(ctx, email, excludeId)
 }

@@ -31,7 +31,7 @@ func prepareLearningMaterial(t *testing.T, db *pg.DB) ([]*model.LearningMaterial
 
 func TestLearningMaterialDao_Create(t *testing.T) {
 	pls, pSubjects, pUsers := prepareLearningMaterial(t, db)
-	dao := NewLearningMaterialDao(db)
+	dao := NewLearningMaterial(db)
 
 	createdById := pUsers[rand.Intn(len(pUsers))].Id
 	subjectId := pSubjects[rand.Intn(len(pSubjects))].Id
@@ -91,7 +91,7 @@ func TestLearningMaterialDao_Create(t *testing.T) {
 
 func TestLearningMaterialDao_Get(t *testing.T) {
 	pls, _, _ := prepareLearningMaterial(t, db)
-	dao := NewLearningMaterialDao(db)
+	dao := NewLearningMaterial(db)
 
 	t.Run("正常获取", func(t *testing.T) {
 		for _, pl := range pls {
@@ -116,7 +116,7 @@ func TestLearningMaterialDao_Get(t *testing.T) {
 
 func TestLearningMaterialDao_Update(t *testing.T) {
 	pls, _, pUsers := prepareLearningMaterial(t, db)
-	dao := NewLearningMaterialDao(db)
+	dao := NewLearningMaterial(db)
 
 	updatedById := pUsers[rand.Intn(len(pUsers))].Id
 
@@ -174,7 +174,7 @@ func TestLearningMaterialDao_Update(t *testing.T) {
 
 func TestLearningMaterialDao_Delete(t *testing.T) {
 	pLs, _, _ := prepareLearningMaterial(t, db)
-	dao := NewLearningMaterialDao(db)
+	dao := NewLearningMaterial(db)
 
 	t.Run("正常删除", func(t *testing.T) {
 		at := assert.New(t)

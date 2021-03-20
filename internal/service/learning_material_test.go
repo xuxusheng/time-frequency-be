@@ -29,7 +29,7 @@ func prepareLearningMaterial(t *testing.T, db *pg.DB) ([]*model.LearningMaterial
 
 func TestLearningMaterialSvc_Create(t *testing.T) {
 	pLms, pSubjects, pUsers := prepareLearningMaterial(t, db)
-	svc := NewLearningMaterialSvc(lmDao)
+	svc := NewLearningMaterial(lmDao)
 
 	t.Run("资料名称重复", func(t *testing.T) {
 		for _, pLm := range pLms {
@@ -118,7 +118,7 @@ func TestLearningMaterialSvc_Create(t *testing.T) {
 
 func TestLearningMaterialSvc_Get(t *testing.T) {
 	pLms, _, _ := prepareLearningMaterial(t, db)
-	svc := NewLearningMaterialSvc(lmDao)
+	svc := NewLearningMaterial(lmDao)
 
 	t.Run("正常获取", func(t *testing.T) {
 		for _, pLm := range pLms {
@@ -142,7 +142,7 @@ func TestLearningMaterialSvc_Get(t *testing.T) {
 
 func TestLearningMaterialSvc_Update(t *testing.T) {
 	pLms, _, pUsers := prepareLearningMaterial(t, db)
-	svc := NewLearningMaterialSvc(lmDao)
+	svc := NewLearningMaterial(lmDao)
 
 	t.Run("班级名称重复", func(t *testing.T) {
 		for i := 0; i < len(pLms)-1; i++ {
@@ -194,7 +194,7 @@ func TestLearningMaterialSvc_Update(t *testing.T) {
 
 func TestLearningMaterialSvc_Delete(t *testing.T) {
 	pLms, _, _ := prepareLearningMaterial(t, db)
-	svc := NewLearningMaterialSvc(lmDao)
+	svc := NewLearningMaterial(lmDao)
 
 	t.Run("正常删除", func(t *testing.T) {
 		for _, pLm := range pLms {
@@ -220,7 +220,7 @@ func TestLearningMaterialSvc_Delete(t *testing.T) {
 
 func TestLearningMaterialSvc_IsNameExist(t *testing.T) {
 	pLms, _, _ := prepareLearningMaterial(t, db)
-	svc := NewLearningMaterialSvc(lmDao)
+	svc := NewLearningMaterial(lmDao)
 
 	t.Run("排除当前资料后，查找当前资料的名称", func(t *testing.T) {
 		for _, pLm := range pLms {

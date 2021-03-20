@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-type ILearningMaterialDao interface {
+type ILearningMaterial interface {
 	Create(ctx context.Context, createdById, subjectId int, name, description, md5, filePath string) (*model.LearningMaterial, error)
 	Get(ctx context.Context, id int) (*model.LearningMaterial, error)
 	Update(ctx context.Context, id, updatedBy int, name, description string) (*model.LearningMaterial, error)
@@ -15,15 +15,15 @@ type ILearningMaterialDao interface {
 	IsNameExist(ctx context.Context, name string, excludeId int) (bool, error)
 }
 
-func NewLearningMaterialDao(db orm.DB) *LearningMaterialDao {
-	return &LearningMaterialDao{db: db}
+func NewLearningMaterial(db orm.DB) *LearningMaterial {
+	return &LearningMaterial{db: db}
 }
 
-type LearningMaterialDao struct {
+type LearningMaterial struct {
 	db orm.DB
 }
 
-func (l LearningMaterialDao) Create(ctx context.Context, createdById, subjectId int, name, description, md5, filePath string) (*model.LearningMaterial, error) {
+func (l LearningMaterial) Create(ctx context.Context, createdById, subjectId int, name, description, md5, filePath string) (*model.LearningMaterial, error) {
 	lm := model.LearningMaterial{
 		Name:        name,
 		Description: description,
@@ -42,7 +42,7 @@ func (l LearningMaterialDao) Create(ctx context.Context, createdById, subjectId 
 	return &lm, err
 }
 
-func (l LearningMaterialDao) Get(ctx context.Context, id int) (*model.LearningMaterial, error) {
+func (l LearningMaterial) Get(ctx context.Context, id int) (*model.LearningMaterial, error) {
 	lm := model.LearningMaterial{Id: id}
 	err := l.db.ModelContext(ctx, &lm).WherePK().Select()
 	if err != nil {
@@ -51,7 +51,7 @@ func (l LearningMaterialDao) Get(ctx context.Context, id int) (*model.LearningMa
 	return &lm, err
 }
 
-func (l LearningMaterialDao) Update(ctx context.Context, id, updatedBy int, name, description string) (*model.LearningMaterial, error) {
+func (l LearningMaterial) Update(ctx context.Context, id, updatedBy int, name, description string) (*model.LearningMaterial, error) {
 	lm := model.LearningMaterial{
 		Id:          id,
 		Name:        name,
@@ -66,12 +66,12 @@ func (l LearningMaterialDao) Update(ctx context.Context, id, updatedBy int, name
 	return &lm, err
 }
 
-func (l LearningMaterialDao) Delete(ctx context.Context, id int) error {
+func (l LearningMaterial) Delete(ctx context.Context, id int) error {
 	_, err := l.db.ModelContext(ctx, &model.LearningMaterial{Id: id}).WherePK().Delete()
 	return err
 }
 
-func (l LearningMaterialDao) IsNameExist(ctx context.Context, name string, excludeId int) (bool, error) {
+func (l LearningMaterial) IsNameExist(ctx context.Context, name string, excludeId int) (bool, error) {
 	db := l.db.ModelContext(ctx, &model.LearningMaterial{})
 	if excludeId != 0 {
 		db = db.Where("id != ?", excludeId)

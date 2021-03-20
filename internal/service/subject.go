@@ -7,7 +7,7 @@ import (
 	"github.com/xuxusheng/time-frequency-be/internal/model"
 )
 
-type ISubjectSvc interface {
+type ISubject interface {
 	Create(ctx context.Context, createById int, name, description string) (*model.Subject, error)
 	Get(ctx context.Context, id int) (*model.Subject, error)
 	Update(ctx context.Context, id int, name, description string) (*model.Subject, error)
@@ -15,15 +15,15 @@ type ISubjectSvc interface {
 	IsNameExist(ctx context.Context, name string, excludeId int) (bool, error)
 }
 
-func NewSubjectSvc(dao dao.ISubjectDao) *SubjectSvc {
-	return &SubjectSvc{Dao: dao}
+func NewSubject(dao dao.ISubject) *Subject {
+	return &Subject{Dao: dao}
 }
 
-type SubjectSvc struct {
-	Dao dao.ISubjectDao
+type Subject struct {
+	Dao dao.ISubject
 }
 
-func (s SubjectSvc) Create(ctx context.Context, createById int, name, description string) (*model.Subject, error) {
+func (s Subject) Create(ctx context.Context, createById int, name, description string) (*model.Subject, error) {
 	d := s.Dao
 	// 科目名称是否重复
 	is, err := d.IsNameExist(ctx, name, 0)
@@ -40,11 +40,11 @@ func (s SubjectSvc) Create(ctx context.Context, createById int, name, descriptio
 	return subject, nil
 }
 
-func (s SubjectSvc) Get(ctx context.Context, id int) (*model.Subject, error) {
+func (s Subject) Get(ctx context.Context, id int) (*model.Subject, error) {
 	return s.Dao.Get(ctx, id)
 }
 
-func (s SubjectSvc) Update(ctx context.Context, id int, name, description string) (*model.Subject, error) {
+func (s Subject) Update(ctx context.Context, id int, name, description string) (*model.Subject, error) {
 	d := s.Dao
 	// 判断科目名称是否重复
 	is, err := d.IsNameExist(ctx, name, id)
@@ -61,10 +61,10 @@ func (s SubjectSvc) Update(ctx context.Context, id int, name, description string
 	return subject, nil
 }
 
-func (s SubjectSvc) Delete(ctx context.Context, id int) error {
+func (s Subject) Delete(ctx context.Context, id int) error {
 	return s.Dao.Delete(ctx, id)
 }
 
-func (s SubjectSvc) IsNameExist(ctx context.Context, name string, excludeId int) (bool, error) {
+func (s Subject) IsNameExist(ctx context.Context, name string, excludeId int) (bool, error) {
 	return s.Dao.IsNameExist(ctx, name, excludeId)
 }

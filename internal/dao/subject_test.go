@@ -27,7 +27,7 @@ func prepareSubject(t *testing.T, db *pg.DB) ([]*model.Subject, []*model.User) {
 func TestSubjectDao_Create(t *testing.T) {
 	pSubjects, pUsers := prepareSubject(t, db)
 	createdById := pUsers[0].Id
-	dao := NewSubjectDao(db)
+	dao := NewSubject(db)
 
 	t.Run("名称重复", func(t *testing.T) {
 		for _, pSubject := range pSubjects {
@@ -66,7 +66,7 @@ func TestSubjectDao_Create(t *testing.T) {
 
 func TestSubjectDao_Get(t *testing.T) {
 	pSubjects, _ := prepareSubject(t, db)
-	dao := NewSubjectDao(db)
+	dao := NewSubject(db)
 
 	t.Run("正常获取", func(t *testing.T) {
 		for _, pSubject := range pSubjects {
@@ -89,7 +89,7 @@ func TestSubjectDao_Get(t *testing.T) {
 
 func TestSubjectDao_Update(t *testing.T) {
 	pSubjects, _ := prepareSubject(t, db)
-	dao := NewSubjectDao(db)
+	dao := NewSubject(db)
 
 	t.Run("科目名称重复", func(t *testing.T) {
 		for i := 0; i < len(pSubjects)-1; i++ {
@@ -137,7 +137,7 @@ func TestSubjectDao_Update(t *testing.T) {
 
 func TestSubjectDao_Delete(t *testing.T) {
 	pSubjects, _ := prepareSubject(t, db)
-	dao := NewSubjectDao(db)
+	dao := NewSubject(db)
 
 	t.Run("正常删除", func(t *testing.T) {
 		for _, pSubject := range pSubjects {

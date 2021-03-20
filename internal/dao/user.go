@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-type IUserDao interface {
+type IUser interface {
 	// 创建用户
 	Create(ctx context.Context, createdBy int, name, phone, email, password string) (*model.User, error)
 	// 获取单个用户
@@ -24,17 +24,17 @@ type IUserDao interface {
 	IsEmailExist(ctx context.Context, email string, excludeId int) (bool, error)
 }
 
-func NewUserDao(db orm.DB) *UserDao {
-	return &UserDao{
+func NewUser(db orm.DB) *User {
+	return &User{
 		db: db,
 	}
 }
 
-type UserDao struct {
+type User struct {
 	db orm.DB
 }
 
-func (u *UserDao) Create(ctx context.Context, createdBy int, name, phone, email, password string) (*model.User, error) {
+func (u *User) Create(ctx context.Context, createdBy int, name, phone, email, password string) (*model.User, error) {
 	user := model.User{
 		Name:        name,
 		Phone:       phone,
@@ -51,7 +51,7 @@ func (u *UserDao) Create(ctx context.Context, createdBy int, name, phone, email,
 	return &user, nil
 }
 
-func (u *UserDao) Get(ctx context.Context, id int) (*model.User, error) {
+func (u *User) Get(ctx context.Context, id int) (*model.User, error) {
 	user := model.User{Id: id}
 	err := u.db.ModelContext(ctx, &user).WherePK().Relation("CreatedBy").Select()
 	if err != nil {
@@ -60,7 +60,7 @@ func (u *UserDao) Get(ctx context.Context, id int) (*model.User, error) {
 	return &user, err
 }
 
-func (u *UserDao) Update(ctx context.Context, id int, name, phone, email string) (*model.User, error) {
+func (u *User) Update(ctx context.Context, id int, name, phone, email string) (*model.User, error) {
 	user := model.User{Id: id, Name: name, Phone: phone, Email: email, UpdatedAt: time.Now()}
 	_, err := u.db.
 		ModelContext(ctx, &user).
@@ -74,12 +74,12 @@ func (u *UserDao) Update(ctx context.Context, id int, name, phone, email string)
 	return &user, nil
 }
 
-func (u *UserDao) Delete(ctx context.Context, id int) error {
+func (u *User) Delete(ctx context.Context, id int) error {
 	_, err := u.db.ModelContext(ctx, &model.User{Id: id}).WherePK().Delete()
 	return err
 }
 
-func (u *UserDao) IsNameExist(ctx context.Context, name string, excludeId int) (bool, error) {
+func (u *User) IsNameExist(ctx context.Context, name string, excludeId int) (bool, error) {
 	db := u.db.ModelContext(ctx, &model.User{})
 	if excludeId != 0 {
 		db = db.Where("id != ?", excludeId)
@@ -87,7 +87,7 @@ func (u *UserDao) IsNameExist(ctx context.Context, name string, excludeId int) (
 	return db.Where("name = ?", name).Exists()
 }
 
-func (u *UserDao) IsPhoneExist(ctx context.Context, phone string, excludeId int) (bool, error) {
+func (u *User) IsPhoneExist(ctx context.Context, phone string, excludeId int) (bool, error) {
 	db := u.db.ModelContext(ctx, &model.User{})
 	if excludeId != 0 {
 		db = db.Where("id != ?", excludeId)
@@ -95,7 +95,7 @@ func (u *UserDao) IsPhoneExist(ctx context.Context, phone string, excludeId int)
 	return db.Where("phone = ?", phone).Exists()
 }
 
-func (u *UserDao) IsEmailExist(ctx context.Context, email string, excludeId int) (bool, error) {
+func (u *User) IsEmailExist(ctx context.Context, email string, excludeId int) (bool, error) {
 	db := u.db.ModelContext(ctx, &model.User{})
 	if excludeId != 0 {
 		db = db.Where("id != ?", excludeId)

@@ -7,7 +7,7 @@ import (
 	"github.com/xuxusheng/time-frequency-be/internal/model"
 )
 
-type IClassSvc interface {
+type IClass interface {
 	Create(ctx context.Context, createdById int, name, description string) (*model.Class, error)
 	Get(ctx context.Context, id int) (*model.User, error)
 	Update(ctx context.Context, id int, name, description string) (*model.Class, error)
@@ -15,15 +15,15 @@ type IClassSvc interface {
 	IsNameExist(ctx context.Context, name string, excludeId int) (bool, error)
 }
 
-func NewClassSvc(dao dao.IClassDao) *ClassSvc {
-	return &ClassSvc{Dao: dao}
+func NewClass(dao dao.IClass) *Class {
+	return &Class{Dao: dao}
 }
 
-type ClassSvc struct {
-	Dao dao.IClassDao
+type Class struct {
+	Dao dao.IClass
 }
 
-func (c ClassSvc) Create(ctx context.Context, createdById int, name, description string) (*model.Class, error) {
+func (c Class) Create(ctx context.Context, createdById int, name, description string) (*model.Class, error) {
 	d := c.Dao
 
 	// 判断班级名称是否重复
@@ -42,11 +42,11 @@ func (c ClassSvc) Create(ctx context.Context, createdById int, name, description
 	return class, nil
 }
 
-func (c ClassSvc) Get(ctx context.Context, id int) (*model.Class, error) {
+func (c Class) Get(ctx context.Context, id int) (*model.Class, error) {
 	return c.Dao.Get(ctx, id)
 }
 
-func (c ClassSvc) Update(ctx context.Context, id int, name, description string) (*model.Class, error) {
+func (c Class) Update(ctx context.Context, id int, name, description string) (*model.Class, error) {
 	d := c.Dao
 	// 判断班级名称是否已被占用
 	is, err := d.IsNameExist(ctx, name, id)
@@ -63,10 +63,10 @@ func (c ClassSvc) Update(ctx context.Context, id int, name, description string) 
 	return class, nil
 }
 
-func (c ClassSvc) Delete(ctx context.Context, id int) error {
+func (c Class) Delete(ctx context.Context, id int) error {
 	return c.Dao.Delete(ctx, id)
 }
 
-func (c ClassSvc) IsNameExist(ctx context.Context, name string, excludeId int) (bool, error) {
+func (c Class) IsNameExist(ctx context.Context, name string, excludeId int) (bool, error) {
 	return c.Dao.IsNameExist(ctx, name, excludeId)
 }

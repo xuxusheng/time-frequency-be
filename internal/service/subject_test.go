@@ -25,7 +25,7 @@ func prepareSubject(t *testing.T, db *pg.DB) ([]*model.Subject, []*model.User) {
 
 func TestSubjectSvc_Create(t *testing.T) {
 	pSubjects, pUsers := prepareSubject(t, db)
-	svc := NewSubjectSvc(subjectDao)
+	svc := NewSubject(subjectDao)
 
 	t.Run("科目名称重复", func(t *testing.T) {
 		for _, pSubject := range pSubjects {
@@ -76,7 +76,7 @@ func TestSubjectSvc_Create(t *testing.T) {
 
 func TestSubjectSvc_Get(t *testing.T) {
 	pSubjects, _ := prepareSubject(t, db)
-	svc := NewSubjectSvc(subjectDao)
+	svc := NewSubject(subjectDao)
 
 	t.Run("正常获取", func(t *testing.T) {
 		for _, pSubject := range pSubjects {
@@ -100,7 +100,7 @@ func TestSubjectSvc_Get(t *testing.T) {
 
 func TestSubjectSvc_Update(t *testing.T) {
 	pSubjects, _ := prepareSubject(t, db)
-	svc := NewSubjectSvc(subjectDao)
+	svc := NewSubject(subjectDao)
 
 	t.Run("科目名称重复", func(t *testing.T) {
 		for i := 0; i < len(pSubjects)-1; i++ {
@@ -149,7 +149,7 @@ func TestSubjectSvc_Update(t *testing.T) {
 
 func TestSubjectSvc_Delete(t *testing.T) {
 	pSubjects, _ := prepareSubject(t, db)
-	svc := NewSubjectSvc(subjectDao)
+	svc := NewSubject(subjectDao)
 
 	t.Run("正常删除", func(t *testing.T) {
 		for _, pSubject := range pSubjects {
@@ -175,7 +175,7 @@ func TestSubjectSvc_Delete(t *testing.T) {
 
 func TestSubjectSvc_IsNameExist(t *testing.T) {
 	pSubjects, _ := prepareSubject(t, db)
-	svc := NewSubjectSvc(subjectDao)
+	svc := NewSubject(subjectDao)
 
 	t.Run("排除当前科目后，查找当前科目名称", func(t *testing.T) {
 		for _, pSubject := range pSubjects {

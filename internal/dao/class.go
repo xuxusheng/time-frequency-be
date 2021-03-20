@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-type IClassDao interface {
+type IClass interface {
 	Create(ctx context.Context, createdById int, name, description string) (*model.Class, error)
 	Get(ctx context.Context, id int) (*model.Class, error)
 	Update(ctx context.Context, id int, name, description string) (*model.Class, error)
@@ -15,15 +15,15 @@ type IClassDao interface {
 	IsNameExist(ctx context.Context, name string, excludeId int) (bool, error)
 }
 
-func NewClassDao(db orm.DB) *ClassDao {
-	return &ClassDao{db: db}
+func NewClass(db orm.DB) *Class {
+	return &Class{db: db}
 }
 
-type ClassDao struct {
+type Class struct {
 	db orm.DB
 }
 
-func (c ClassDao) Create(ctx context.Context, createdById int, name, description string) (*model.Class, error) {
+func (c Class) Create(ctx context.Context, createdById int, name, description string) (*model.Class, error) {
 	class := model.Class{
 		Name:        name,
 		Description: description,
@@ -38,7 +38,7 @@ func (c ClassDao) Create(ctx context.Context, createdById int, name, description
 	return &class, err
 }
 
-func (c ClassDao) Get(ctx context.Context, id int) (*model.Class, error) {
+func (c Class) Get(ctx context.Context, id int) (*model.Class, error) {
 	class := model.Class{Id: id}
 	err := c.db.ModelContext(ctx, &class).WherePK().Select()
 	if err != nil {
@@ -47,7 +47,7 @@ func (c ClassDao) Get(ctx context.Context, id int) (*model.Class, error) {
 	return &class, nil
 }
 
-func (c ClassDao) Update(ctx context.Context, id int, name, description string) (*model.Class, error) {
+func (c Class) Update(ctx context.Context, id int, name, description string) (*model.Class, error) {
 	class := model.Class{Id: id, Name: name, Description: description, UpdatedAt: time.Now()}
 	_, err := c.db.
 		ModelContext(ctx, &class).
@@ -61,12 +61,12 @@ func (c ClassDao) Update(ctx context.Context, id int, name, description string) 
 	return &class, nil
 }
 
-func (c ClassDao) Delete(ctx context.Context, id int) error {
+func (c Class) Delete(ctx context.Context, id int) error {
 	_, err := c.db.ModelContext(ctx, &model.Class{Id: id}).WherePK().Delete()
 	return err
 }
 
-func (c ClassDao) IsNameExist(ctx context.Context, name string, excludeId int) (bool, error) {
+func (c Class) IsNameExist(ctx context.Context, name string, excludeId int) (bool, error) {
 	db := c.db.ModelContext(ctx, &model.Class{})
 	if excludeId != 0 {
 		db = db.Where("id != ?", excludeId)
