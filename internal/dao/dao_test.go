@@ -26,7 +26,12 @@ func TestMain(m *testing.M) {
 func setup() {
 	var err error
 
-	db, err = database.New(context.Background(), "postgres://postgres:1234@localhost:5432/example2?sslmode=disable")
+	db, err = database.New(context.Background(), &pg.Options{
+		Addr:     "localhost:5432",
+		Database: "example2",
+		User:     "postgres",
+		Password: "1234",
+	})
 	if err != nil {
 		log.Fatalf("数据库初始化失败：%v", err)
 	}

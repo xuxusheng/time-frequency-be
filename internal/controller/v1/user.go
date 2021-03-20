@@ -1,10 +1,9 @@
 package v1
 
 import (
-	"context"
 	"github.com/kataras/iris/v12"
+	"github.com/xuxusheng/time-frequency-be/global"
 	"github.com/xuxusheng/time-frequency-be/internal/dao"
-	"github.com/xuxusheng/time-frequency-be/internal/infrastructure/database"
 	"github.com/xuxusheng/time-frequency-be/internal/pkg/cerror"
 	"github.com/xuxusheng/time-frequency-be/internal/pkg/response"
 	"github.com/xuxusheng/time-frequency-be/internal/service"
@@ -28,17 +27,12 @@ func (u User) Create(c iris.Context) {
 	resp := response.New(c)
 
 	s := time.Now().String()
-	name := "name"
+	name := s + "name"
 	phone := s + "phone"
 	email := s + "email"
 	password := s + "password"
 
-	db, err := database.New(context.Background(), "postgres://postgres:1234@localhost:5432/example2?sslmode=disable")
-	if err != nil {
-		resp.Error(cerror.ServerError.WithDebugs(err))
-		return
-	}
-	svc := service.NewUser(dao.NewUser(db))
+	svc := service.NewUser(dao.NewUser(global.DB))
 
 	user, err := svc.Create(ctx, 1, name, phone, email, password)
 

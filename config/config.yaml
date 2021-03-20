@@ -1,0 +1,17 @@
+Server:
+  Mode: debug
+  HttpPort: 8080
+  ReadTimeout: 10s
+  WriteTimeout: 10s
+App:
+  DefaultPs: 10
+  MaxPs: 200
+JWT:
+  Secret: this is a debug JWT secret
+  Issuer: xusheng:20691718@qq.com
+  Expire: 24h
+DB:
+  Host: "localhost:5432"
+  Database: example2
+  User: postgres
+  Password: 1234

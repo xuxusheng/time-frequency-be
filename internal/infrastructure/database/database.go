@@ -8,13 +8,8 @@ import (
 	"github.com/xuxusheng/time-frequency-be/internal/model"
 )
 
-func New(ctx context.Context, dsn string) (*pg.DB, error) {
-	opt, err := pg.ParseURL(dsn)
-	if err != nil {
-		return nil, errors.Wrap(err, "DSN 不合法")
-	}
-
-	db := pg.Connect(opt)
+func New(ctx context.Context, options *pg.Options) (*pg.DB, error) {
+	db := pg.Connect(options)
 
 	if err := db.Ping(ctx); err != nil {
 		return nil, errors.Wrap(err, "连接失败")
@@ -28,7 +23,7 @@ func New(ctx context.Context, dsn string) (*pg.DB, error) {
 	}
 
 	for _, schema := range schemas {
-		err = db.ModelContext(ctx, schema).CreateTable(&orm.CreateTableOptions{
+		err := db.ModelContext(ctx, schema).CreateTable(&orm.CreateTableOptions{
 			Temp:        false,
 			IfNotExists: true,
 		})
