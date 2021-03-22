@@ -114,7 +114,7 @@ func TestLearningMaterialSvc_Create(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestLearningMaterialSvc_Get(t *testing.T) {
@@ -138,7 +138,7 @@ func TestLearningMaterialSvc_Get(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestLearningMaterialSvc_Update(t *testing.T) {
@@ -190,7 +190,7 @@ func TestLearningMaterialSvc_Update(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestLearningMaterialSvc_Delete(t *testing.T) {
@@ -216,7 +216,7 @@ func TestLearningMaterialSvc_Delete(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestLearningMaterialSvc_IsNameExist(t *testing.T) {
@@ -261,5 +261,5 @@ func TestLearningMaterialSvc_IsNameExist(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }

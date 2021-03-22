@@ -74,7 +74,7 @@ func TestClassSvc_Create(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestClassSvc_Get(t *testing.T) {
@@ -98,7 +98,7 @@ func TestClassSvc_Get(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestClassSvc_Update(t *testing.T) {
@@ -146,7 +146,7 @@ func TestClassSvc_Update(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestClassSvc_Delete(t *testing.T) {
@@ -172,7 +172,7 @@ func TestClassSvc_Delete(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestClassSvc_IsNameExist(t *testing.T) {
@@ -217,5 +217,5 @@ func TestClassSvc_IsNameExist(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }

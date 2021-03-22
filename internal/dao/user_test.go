@@ -20,7 +20,7 @@ func prepareUser(t *testing.T, db *pg.DB) []*model.User {
 	return users
 }
 
-func TestUserDao_Create(t *testing.T) {
+func TestUser_Create(t *testing.T) {
 	pUsers := prepareUser(t, db)
 	dao := NewUser(db)
 
@@ -64,10 +64,10 @@ func TestUserDao_Create(t *testing.T) {
 	})
 
 	// 清空数据库
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
-func TestUserDao_Get(t *testing.T) {
+func TestUser_Get(t *testing.T) {
 	pUsers := prepareUser(t, db)
 	dao := NewUser(db)
 
@@ -89,10 +89,10 @@ func TestUserDao_Get(t *testing.T) {
 	})
 
 	// 清空数据库
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
-func TestUserDao_Update(t *testing.T) {
+func TestUser_Update(t *testing.T) {
 	pUsers := prepareUser(t, db)
 	dao := NewUser(db)
 
@@ -162,10 +162,10 @@ func TestUserDao_Update(t *testing.T) {
 	})
 
 	// 清空数据库
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
-func TestUserDao_Delete(t *testing.T) {
+func TestUser_Delete(t *testing.T) {
 
 	pUsers := prepareUser(t, db)
 	dao := NewUser(db)
@@ -191,7 +191,7 @@ func TestUserDao_Delete(t *testing.T) {
 	})
 }
 
-func TestUserDao_IsNameExist(t *testing.T) {
+func TestUser_IsNameExist(t *testing.T) {
 	pUsers := prepareUser(t, db)
 	dao := NewUser(db)
 
@@ -233,10 +233,10 @@ func TestUserDao_IsNameExist(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
-func TestUserDao_IsPhoneExist(t *testing.T) {
+func TestUser_IsPhoneExist(t *testing.T) {
 	pUsers := prepareUser(t, db)
 	dao := NewUser(db)
 
@@ -278,10 +278,10 @@ func TestUserDao_IsPhoneExist(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
-func TestUserDao_IsEmailExist(t *testing.T) {
+func TestUser_IsEmailExist(t *testing.T) {
 	pUsers := prepareUser(t, db)
 	dao := NewUser(db)
 
@@ -323,5 +323,5 @@ func TestUserDao_IsEmailExist(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }

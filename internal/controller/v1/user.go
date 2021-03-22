@@ -2,8 +2,6 @@ package v1
 
 import (
 	"github.com/kataras/iris/v12"
-	"github.com/xuxusheng/time-frequency-be/global"
-	"github.com/xuxusheng/time-frequency-be/internal/dao"
 	"github.com/xuxusheng/time-frequency-be/internal/pkg/cerror"
 	"github.com/xuxusheng/time-frequency-be/internal/pkg/response"
 	"github.com/xuxusheng/time-frequency-be/internal/service"
@@ -11,14 +9,21 @@ import (
 )
 
 type IUser interface {
-	Create()
+	Create(c iris.Context)
+	Get(c iris.Context)
+	Update(c iris.Context)
+	Delete(c iris.Context)
+	IsNameExist(c iris.Context)
+	IsPhoneExist(c iris.Context)
+	IsEmailExist(c iris.Context)
 }
 
 type User struct {
+	userSvc service.IUser
 }
 
-func NewUser() *User {
-	return &User{}
+func NewUser(userSvc service.IUser) *User {
+	return &User{userSvc: userSvc}
 }
 
 func (u User) Create(c iris.Context) {
@@ -32,9 +37,7 @@ func (u User) Create(c iris.Context) {
 	email := s + "email"
 	password := s + "password"
 
-	svc := service.NewUser(dao.NewUser(global.DB))
-
-	user, err := svc.Create(ctx, 1, name, phone, email, password)
+	user, err := u.userSvc.Create(ctx, 1, name, phone, email, password)
 
 	if err != nil {
 		if cerr, ok := err.(cerror.IError); ok {
