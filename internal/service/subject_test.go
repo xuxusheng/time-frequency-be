@@ -72,7 +72,7 @@ func TestSubjectSvc_Create(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestSubjectSvc_Get(t *testing.T) {
@@ -96,7 +96,7 @@ func TestSubjectSvc_Get(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestSubjectSvc_Update(t *testing.T) {
@@ -145,7 +145,7 @@ func TestSubjectSvc_Update(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestSubjectSvc_Delete(t *testing.T) {
@@ -171,7 +171,7 @@ func TestSubjectSvc_Delete(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestSubjectSvc_IsNameExist(t *testing.T) {
@@ -216,5 +216,5 @@ func TestSubjectSvc_IsNameExist(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }

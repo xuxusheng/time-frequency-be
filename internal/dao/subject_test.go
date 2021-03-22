@@ -61,7 +61,7 @@ func TestSubjectDao_Create(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestSubjectDao_Get(t *testing.T) {
@@ -84,7 +84,7 @@ func TestSubjectDao_Get(t *testing.T) {
 			assert.Nil(t, subject)
 		}
 	})
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestSubjectDao_Update(t *testing.T) {
@@ -132,7 +132,7 @@ func TestSubjectDao_Update(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestSubjectDao_Delete(t *testing.T) {
@@ -158,5 +158,5 @@ func TestSubjectDao_Delete(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }

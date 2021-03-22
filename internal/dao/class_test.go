@@ -72,7 +72,7 @@ func TestClassDao_Create(t *testing.T) {
 	})
 
 	// 清空数据库
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestClassDao_Get(t *testing.T) {
@@ -96,7 +96,7 @@ func TestClassDao_Get(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestClassDao_Update(t *testing.T) {
@@ -154,7 +154,7 @@ func TestClassDao_Update(t *testing.T) {
 	})
 
 	// 清空数据库
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestClassDao_Delete(t *testing.T) {
@@ -183,7 +183,7 @@ func TestClassDao_Delete(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestClassDao_IsNameExist(t *testing.T) {
@@ -228,5 +228,5 @@ func TestClassDao_IsNameExist(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }

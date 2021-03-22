@@ -86,7 +86,7 @@ func TestLearningMaterialDao_Create(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestLearningMaterialDao_Get(t *testing.T) {
@@ -111,7 +111,7 @@ func TestLearningMaterialDao_Get(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestLearningMaterialDao_Update(t *testing.T) {
@@ -169,7 +169,7 @@ func TestLearningMaterialDao_Update(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestLearningMaterialDao_Delete(t *testing.T) {
@@ -196,5 +196,5 @@ func TestLearningMaterialDao_Delete(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }

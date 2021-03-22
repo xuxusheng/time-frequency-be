@@ -1,22 +1,22 @@
-package service
+package v1
 
 import (
 	"github.com/go-pg/pg/v10"
 	"github.com/xuxusheng/time-frequency-be/internal/dao"
 	"github.com/xuxusheng/time-frequency-be/internal/infrastructure/testdb"
+	"github.com/xuxusheng/time-frequency-be/internal/service"
 	"log"
 	"os"
 	"testing"
 )
 
 var db *pg.DB
-var userDao *dao.User
-var subjectDao *dao.Subject
-var classDao *dao.Class
-var lmDao *dao.LearningMaterial
+var userSvc *service.User
 
 func TestMain(m *testing.M) {
 	setup()
+
+	userSvc = service.NewUser(dao.NewUser(db))
 
 	code := m.Run()
 
@@ -24,6 +24,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatalf("测试完成后删除数据表失败：%v", err)
 	}
+
 	os.Exit(code)
 }
 
@@ -33,9 +34,4 @@ func setup() {
 	if err != nil {
 		log.Fatalf("测试数据库连接失败：%v", err)
 	}
-
-	userDao = dao.NewUser(db)
-	subjectDao = dao.NewSubject(db)
-	classDao = dao.NewClass(db)
-	lmDao = dao.NewLearningMaterial(db)
 }

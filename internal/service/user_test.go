@@ -90,7 +90,7 @@ func TestUserSvc_Create(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestUserSvc_Get(t *testing.T) {
@@ -115,7 +115,7 @@ func TestUserSvc_Get(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestUserSvc_Update(t *testing.T) {
@@ -199,7 +199,7 @@ func TestUserSvc_Update(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestUserSvc_Delete(t *testing.T) {
@@ -268,7 +268,7 @@ func TestUserSvc_IsNameExist(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestUserSvc_IsPhoneExist(t *testing.T) {
@@ -313,7 +313,7 @@ func TestUserSvc_IsPhoneExist(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
 
 func TestUserSvc_IsEmailExist(t *testing.T) {
@@ -358,5 +358,5 @@ func TestUserSvc_IsEmailExist(t *testing.T) {
 		}
 	})
 
-	truncateTable(db)
+	_ = testdb.Truncate(db)
 }
