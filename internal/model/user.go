@@ -20,7 +20,7 @@ type User struct {
 	CreatedById int   `json:"-"`
 	CreatedBy   *User `json:"created_by" pg:"rel:has-one"` // 用户的创建人
 
-	LearningMaterials []*LearningMaterial `json:"learning_materials" pg:"rel:has-many"` // 由用户上传的学习资料
+	LearningMaterials []*LearningMaterial `json:"-" pg:"rel:has-many"` // 由用户上传的学习资料
 
 	// --- 通用字段 ---
 	Id        int       `json:"id"`

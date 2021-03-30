@@ -16,9 +16,9 @@ type IError interface {
 	Debugs() []string  // 返回错误 Debug 信息
 	StatusCode() int   // 返回 HTTP 状态码
 
-	WithMsg(msg string) *Error           // 设置错误信息
-	WithDetail(details ...string) *Error // 设置错误详情
-	WithDebugs(debugs ...error) *Error   // 设置错误 Debug 信息
+	WithMsg(msg string) *Error            // 设置错误信息
+	WithDetails(details ...string) *Error // 设置错误详情
+	WithDebugs(debugs ...error) *Error    // 设置错误 Debug 信息
 
 	ToResponse() map[string]interface{} // 将错误类型整理成接口返回需要的形式
 
@@ -72,13 +72,6 @@ func (e *Error) Error() string {
 	if len(e.Debugs()) > 0 {
 		s += fmt.Sprintf("，错误Debug信息：%s", strings.Join(e.Debugs(), ";"))
 	}
-	//return fmt.Sprintf(
-	//	s,
-	//	e.Code(),
-	//	e.Msg(),
-	//	strings.Join(e.Details(), ";"),
-	//	strings.Join(e.Debugs(), ";"),
-	//)
 	return s
 }
 
@@ -117,7 +110,7 @@ func (e *Error) WithMsg(msg string) *Error {
 	return n
 }
 
-func (e *Error) WithDetail(details ...string) *Error {
+func (e *Error) WithDetails(details ...string) *Error {
 	n := e.clone()
 	n.details = []string{}
 	for _, d := range details {

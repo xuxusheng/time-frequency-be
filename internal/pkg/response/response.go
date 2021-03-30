@@ -2,6 +2,7 @@ package response
 
 import (
 	"github.com/kataras/iris/v12"
+	"github.com/xuxusheng/time-frequency-be/internal/model"
 	"github.com/xuxusheng/time-frequency-be/internal/pkg/cerror"
 )
 
@@ -25,9 +26,16 @@ func (r *Response) Success(data ...interface{}) {
 	r.ctx.StopWithJSON(cerror.Success.StatusCode(), d)
 }
 
-//func (r *Response) SuccessList {
-//
-//}
+func (r *Response) SuccessList(list interface{}, p *model.Page) {
+	d := cerror.Success.ToResponse()
+	d["data"] = Map{
+		"items": list,
+		"pn":    p.Pn(),
+		"ps":    p.Ps(),
+		"total": p.Total(),
+	}
+	r.ctx.StopWithJSON(cerror.Success.StatusCode(), d)
+}
 
 func (r *Response) Error(err cerror.IError) {
 	r.ctx.StopWithJSON(err.StatusCode(), err.ToResponse())
