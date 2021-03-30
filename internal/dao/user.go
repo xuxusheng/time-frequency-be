@@ -12,6 +12,10 @@ type IUser interface {
 	Create(ctx context.Context, createdBy int, name, phone, email, password string) (*model.User, error)
 	// 获取单个用户
 	Get(ctx context.Context, id int) (*model.User, error)
+	// 通过 Name 获取用户
+	GetByName(ctx context.Context, name string) (*model.User, error)
+	// 获取多个用户
+	ListAndCount(ctx context.Context, query string, p *model.Page) ([]*model.User, int, error)
 	// 更新用户信息
 	Update(ctx context.Context, id int, name, phone, email string) (*model.User, error)
 	// 删除用户
@@ -58,6 +62,30 @@ func (u *User) Get(ctx context.Context, id int) (*model.User, error) {
 		return nil, err
 	}
 	return &user, err
+}
+
+func (u *User) GetByName(ctx context.Context, name string) (*model.User, error) {
+	user := model.User{}
+	err := u.db.ModelContext(ctx, &user).Where("name = ?", name).Select()
+	if err != nil {
+		return nil, err
+	}
+	return &user, err
+}
+
+func (u *User) ListAndCount(ctx context.Context, query string, p *model.Page) ([]*model.User, int, error) {
+	var users []*model.User
+	count, err := u.db.ModelContext(ctx, &users).
+		Offset(p.Offset()).
+		Limit(p.Limit()).
+		Where("name LIKE ?", "%"+query+"%").
+		WhereOr("phone LIKE ?", "%"+query+"%").
+		WhereOr("email LIKE ?", "%"+query+"%").
+		SelectAndCount()
+	if err != nil {
+		return nil, 0, err
+	}
+	return users, count, err
 }
 
 func (u *User) Update(ctx context.Context, id int, name, phone, email string) (*model.User, error) {

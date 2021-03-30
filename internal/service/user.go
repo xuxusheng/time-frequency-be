@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"github.com/pkg/errors"
 	"github.com/xuxusheng/time-frequency-be/internal/dao"
 	"github.com/xuxusheng/time-frequency-be/internal/model"
 	"github.com/xuxusheng/time-frequency-be/internal/pkg/cerror"
@@ -11,6 +10,8 @@ import (
 type IUser interface {
 	Create(ctx context.Context, createdById int, name, phone, email, password string) (*model.User, error)
 	Get(ctx context.Context, id int) (*model.User, error)
+	GetByName(ctx context.Context, name string) (*model.User, error)
+	ListAndCount(ctx context.Context, query string, p *model.Page) ([]*model.User, int, error)
 	Update(ctx context.Context, id int, name, phone, email string) (*model.User, error)
 	Delete(ctx context.Context, id int) error
 	IsNameExist(ctx context.Context, name string, excludeId int) (bool, error)   // 查询用户名是否被占用
@@ -66,6 +67,14 @@ func (u *User) Get(ctx context.Context, id int) (*model.User, error) {
 	return u.Dao.Get(ctx, id)
 }
 
+func (u *User) GetByName(ctx context.Context, name string) (*model.User, error) {
+	return u.Dao.GetByName(ctx, name)
+}
+
+func (u *User) ListAndCount(ctx context.Context, query string, p *model.Page) ([]*model.User, int, error) {
+	return u.Dao.ListAndCount(ctx, query, p)
+}
+
 func (u *User) Update(ctx context.Context, id int, name, phone, email string) (*model.User, error) {
 	d := u.Dao
 	// 判断用户名是否被占用
@@ -74,21 +83,21 @@ func (u *User) Update(ctx context.Context, id int, name, phone, email string) (*
 		return nil, err
 	}
 	if is {
-		return nil, errors.New("用户名已存在")
+		return nil, cerror.BadRequest.WithMsg("用户名已存在")
 	}
 	is, err = d.IsPhoneExist(ctx, phone, id)
 	if err != nil {
 		return nil, err
 	}
 	if is {
-		return nil, errors.New("手机号已存在")
+		return nil, cerror.BadRequest.WithMsg("手机号已存在")
 	}
 	is, err = d.IsEmailExist(ctx, email, id)
 	if err != nil {
 		return nil, err
 	}
 	if is {
-		return nil, errors.New("邮箱已存在")
+		return nil, cerror.BadRequest.WithMsg("邮箱已存在")
 	}
 
 	user, err := d.Update(ctx, id, name, phone, email)

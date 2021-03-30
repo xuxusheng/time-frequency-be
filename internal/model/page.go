@@ -8,11 +8,11 @@ type Page struct {
 	total int
 }
 
-func New(pn, ps int) *Page {
-	if pn < 0 {
+func NewPage(pn, ps int) *Page {
+	if pn <= 0 {
 		pn = 1
 	}
-	if ps < 0 || ps > global.Setting.App.MaxPs {
+	if ps <= 0 || ps > global.Setting.App.MaxPs {
 		ps = global.Setting.App.DefaultPs
 	}
 	return &Page{
