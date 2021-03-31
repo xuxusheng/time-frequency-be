@@ -8,9 +8,11 @@ type User struct {
 	tableName struct{} `pg:"user"`
 
 	// --- 业务字段 ---
-	Name     string `json:"name" pg:",unique,notnull"`  // 用户名
-	Phone    string `json:"phone" pg:",unique,notnull"` // 手机号
-	Email    string `json:"email" pg:",unique,notnull"` // 邮箱
+	Name     string `json:"name" pg:",unique,notnull"` // 用户名
+	NickName string `json:"nick_name" pg:",notnull"`
+	Phone    string `json:"phone" pg:",unique,notnull"`          // 手机号
+	Email    string `json:"email" pg:",unique,notnull"`          // 邮箱
+	Role     string `json:"role" pg:",notnull,default:'member'"` // 用户角色，admin 管理员，member 普通成员
 	Password string `json:"-" pg:",notnull"`
 
 	// --- 关联字段 ---

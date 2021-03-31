@@ -5,18 +5,23 @@ import (
 	"github.com/xuxusheng/time-frequency-be/internal/dao"
 	"github.com/xuxusheng/time-frequency-be/internal/model"
 	"github.com/xuxusheng/time-frequency-be/internal/pkg/cerror"
+	"github.com/xuxusheng/time-frequency-be/internal/utils"
 )
 
 type IUser interface {
-	Create(ctx context.Context, createdById int, name, phone, email, password string) (*model.User, error)
+	Create(ctx context.Context, createdById int, name, nickName, phone, email, password string) (*model.User, error)
+
 	Get(ctx context.Context, id int) (*model.User, error)
 	GetByName(ctx context.Context, name string) (*model.User, error)
 	ListAndCount(ctx context.Context, query string, p *model.Page) ([]*model.User, int, error)
-	Update(ctx context.Context, id int, name, phone, email string) (*model.User, error)
-	Delete(ctx context.Context, id int) error
 	IsNameExist(ctx context.Context, name string, excludeId int) (bool, error)   // 查询用户名是否被占用
 	IsPhoneExist(ctx context.Context, phone string, excludeId int) (bool, error) // 查询手机号是否被占用
 	IsEmailExist(ctx context.Context, email string, excludeId int) (bool, error) // 查询邮箱是否被占用
+
+	UpdatePhoneAndEmail(ctx context.Context, id int, phone, email string) (*model.User, error)
+	UpdatePassword(ctx context.Context, id int, oldPassword, newPassword string) (*model.User, error)
+
+	Delete(ctx context.Context, id int) error
 }
 
 func NewUser(dao dao.IUser) *User {
@@ -27,7 +32,7 @@ type User struct {
 	Dao dao.IUser
 }
 
-func (u *User) Create(ctx context.Context, createdById int, name, phone, email, password string) (*model.User, error) {
+func (u *User) Create(ctx context.Context, createdById int, name, nickName, phone, email, password string) (*model.User, error) {
 	d := u.Dao
 	// 判断用户名是否已存在
 	is, err := d.IsNameExist(ctx, name, 0)
@@ -56,7 +61,13 @@ func (u *User) Create(ctx context.Context, createdById int, name, phone, email, 
 		return nil, cerror.BadRequest.WithMsg("邮箱已存在")
 	}
 
-	user, err := d.Create(ctx, createdById, name, phone, email, password)
+	// 计算密码 hash
+	hash, err := utils.EncodePwd(password)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := d.Create(ctx, createdById, name, nickName, phone, email, hash)
 	if err != nil {
 		return nil, err
 	}
@@ -75,17 +86,17 @@ func (u *User) ListAndCount(ctx context.Context, query string, p *model.Page) ([
 	return u.Dao.ListAndCount(ctx, query, p)
 }
 
-func (u *User) Update(ctx context.Context, id int, name, phone, email string) (*model.User, error) {
+func (u *User) UpdatePhoneAndEmail(ctx context.Context, id int, phone, email string) (*model.User, error) {
 	d := u.Dao
-	// 判断用户名是否被占用
-	is, err := d.IsNameExist(ctx, name, id)
-	if err != nil {
-		return nil, err
-	}
-	if is {
-		return nil, cerror.BadRequest.WithMsg("用户名已存在")
-	}
-	is, err = d.IsPhoneExist(ctx, phone, id)
+	//// 判断用户名是否被占用
+	//is, err := d.IsNameExist(ctx, name, id)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//if is {
+	//	return nil, cerror.BadRequest.WithMsg("用户名已存在")
+	//}
+	is, err := d.IsPhoneExist(ctx, phone, id)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +111,40 @@ func (u *User) Update(ctx context.Context, id int, name, phone, email string) (*
 		return nil, cerror.BadRequest.WithMsg("邮箱已存在")
 	}
 
-	user, err := d.Update(ctx, id, name, phone, email)
+	user := model.User{
+		Id:    id,
+		Phone: phone,
+		Email: email,
+	}
+	err = d.Update(ctx, &user, []string{"phone", "email"})
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (u *User) UpdatePassword(ctx context.Context, id int, oldPassword, newPassword string) (*model.User, error) {
+	d := u.Dao
+
+	// 验证旧密码是否正确
+	user, err := d.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	err = utils.ComparePwd(user.Password, oldPassword)
+	if err != nil {
+		return nil, cerror.BadRequest.WithMsg("旧密码错误")
+	}
+
+	// 计算新密码 Hash
+	hash, err := utils.EncodePwd(newPassword)
+	if err != nil {
+		return nil, err
+	}
+
+	// 更新密码
+	user, err = d.UpdatePassword(ctx, id, hash)
 	if err != nil {
 		return nil, err
 	}

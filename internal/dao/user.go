@@ -9,7 +9,7 @@ import (
 
 type IUser interface {
 	// 创建用户
-	Create(ctx context.Context, createdBy int, name, phone, email, password string) (*model.User, error)
+	Create(ctx context.Context, createdBy int, name, nickName, phone, email, password string) (*model.User, error)
 	// 获取单个用户
 	Get(ctx context.Context, id int) (*model.User, error)
 	// 通过 Name 获取用户
@@ -17,7 +17,9 @@ type IUser interface {
 	// 获取多个用户
 	ListAndCount(ctx context.Context, query string, p *model.Page) ([]*model.User, int, error)
 	// 更新用户信息
-	Update(ctx context.Context, id int, name, phone, email string) (*model.User, error)
+	Update(ctx context.Context, user *model.User, columns []string) error
+	// 更新密码
+	UpdatePassword(ctx context.Context, id int, password string) (*model.User, error)
 	// 删除用户
 	Delete(ctx context.Context, id int) error
 	// 用户名是否存在
@@ -38,9 +40,10 @@ type User struct {
 	db orm.DB
 }
 
-func (u *User) Create(ctx context.Context, createdBy int, name, phone, email, password string) (*model.User, error) {
+func (u *User) Create(ctx context.Context, createdBy int, name, nickName, phone, email, password string) (*model.User, error) {
 	user := model.User{
 		Name:        name,
+		NickName:    nickName,
 		Phone:       phone,
 		Email:       email,
 		Password:    password,
@@ -88,18 +91,31 @@ func (u *User) ListAndCount(ctx context.Context, query string, p *model.Page) ([
 	return users, count, err
 }
 
-func (u *User) Update(ctx context.Context, id int, name, phone, email string) (*model.User, error) {
-	user := model.User{Id: id, Name: name, Phone: phone, Email: email, UpdatedAt: time.Now()}
+func (u *User) Update(ctx context.Context, user *model.User, columns []string) error {
+	_, err := u.db.
+		ModelContext(ctx, user).
+		Column(columns...).
+		WherePK().
+		Returning("*").
+		Update()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (u *User) UpdatePassword(ctx context.Context, id int, password string) (*model.User, error) {
+	user := model.User{Id: id, Password: password}
 	_, err := u.db.
 		ModelContext(ctx, &user).
-		Column("name", "phone", "email", "updated_at").
+		Column("password").
 		WherePK().
 		Returning("*").
 		Update()
 	if err != nil {
 		return nil, err
 	}
-	return &user, nil
+	return &user, err
 }
 
 func (u *User) Delete(ctx context.Context, id int) error {
