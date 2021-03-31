@@ -78,7 +78,7 @@ func TestUser_Create(t *testing.T) {
 //		e := httptest.New(t, app, httptest.URL("/api/v1/user/get"), httptest.Debug(true), httptest.LogLevel("debug"))
 //		for _, pUser := range pUsers {
 //
-//			e.POST("").WithJSON(GetUserReq{
+//			e.POST("").WithJSON(UserGetReq{
 //				Id: pUser.Id,
 //			}).Expect().Status(httptest.StatusOK)
 //
