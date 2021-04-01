@@ -12,9 +12,9 @@ type Class struct {
 	Description string `json:"description" pg:",use_zero,notnull,default:''"` // 班级描述
 
 	// --- 关联字段 ---
-	Members     []*User `json:"members" pg:"rel:has-many"`   // 班级包含的成员
-	CreatedById int     `json:"-" pg:",notnull"`             // 创建人ID
-	CreatedBy   *User   `json:"created_by" pg:"rel:has-one"` // 创建人
+	Members     []*User `json:"-" pg:"rel:has-many"` // 班级包含的成员
+	CreatedById int     `json:"-" pg:",notnull"`     // 创建人ID
+	CreatedBy   *User   `json:"-" pg:"rel:has-one"`  // 创建人
 
 	// --- 通用字段 ---
 	Id        int       `json:"id"`

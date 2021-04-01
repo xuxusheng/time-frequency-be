@@ -1,6 +1,8 @@
 package v1
 
 import (
+	"errors"
+	"github.com/go-pg/pg/v10"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/middleware/jwt"
 	"github.com/xuxusheng/time-frequency-be/internal/model"
@@ -15,6 +17,9 @@ type ITeacher interface {
 	CreateUser(c iris.Context) // 创建用户
 
 	ListUser(c iris.Context) // 查询用户列表
+	IsNameExist(c iris.Context)
+	IsPhoneExist(c iris.Context)
+	IsEmailExist(c iris.Context)
 
 	UpdateUser(c iris.Context) // 修改用户信息，老师修改时，允许修改用户名和昵称
 
@@ -25,6 +30,11 @@ type Teacher struct {
 	userSvc service.IUser
 }
 
+func NewTeacher(userSvc service.IUser) *Teacher {
+	return &Teacher{userSvc: userSvc}
+}
+
+// --- C ---
 func (t *Teacher) CreateUser(c iris.Context) {
 	p := struct {
 		Name     string `json:"name" validate:"required"`
@@ -51,18 +61,10 @@ func (t *Teacher) CreateUser(c iris.Context) {
 		return
 	}
 
-	resp.Success(iris.Map{
-		"id":         user.Id,
-		"name":       user.Name,
-		"nick_name":  user.NickName,
-		"phone":      user.Phone,
-		"email":      user.Email,
-		"role":       user.Role,
-		"created_at": user.CreatedAt,
-		"updated_at": user.UpdatedAt,
-	})
+	resp.Success(user)
 }
 
+// --- R ---
 func (t *Teacher) ListUser(c iris.Context) {
 	p := struct {
 		Query string `json:"query"`
@@ -84,26 +86,119 @@ func (t *Teacher) ListUser(c iris.Context) {
 	}
 
 	page.WithTotal(count)
-	data := []iris.Map{}
-	for _, user := range users {
-		data = append(data, iris.Map{
-			"id":         user.Id,
-			"name":       user.Name,
-			"nick_name":  user.NickName,
-			"phone":      user.Phone,
-			"email":      user.Email,
-			"role":       user.Role,
-			"created_at": user.CreatedAt,
-			"updated_at": user.UpdatedAt,
-		})
+	resp.SuccessList(users, page)
+}
+
+func (u User) IsNameExist(c iris.Context) {
+	p := struct {
+		Name      string `json:"name" validate:"required, min=1"`
+		ExcludeId int    `json:"exclude_id"`
+	}{}
+
+	if ok := utils.BindAndValidate(c, &p); !ok {
+		return
 	}
-	resp.SuccessList(data, page)
+
+	ctx := c.Request().Context()
+	resp := response.New(c)
+
+	is, err := u.userSvc.IsNameExist(ctx, p.Name, p.ExcludeId)
+	if err != nil {
+		resp.Error(cerror.ServerError.WithDebugs(err))
+		return
+	}
+	resp.Success(is)
 }
 
+func (u User) IsPhoneExist(c iris.Context) {
+	p := struct {
+		Phone     string `json:"phone" validate:"required, min=1"`
+		ExcludeId int    `json:"exclude_id"`
+	}{}
+
+	if ok := utils.BindAndValidate(c, &p); !ok {
+		return
+	}
+
+	ctx := c.Request().Context()
+	resp := response.New(c)
+
+	is, err := u.userSvc.IsPhoneExist(ctx, p.Phone, p.ExcludeId)
+	if err != nil {
+		resp.Error(cerror.ServerError.WithDebugs(err))
+		return
+	}
+	resp.Success(is)
+}
+
+func (u User) IsEmailExist(c iris.Context) {
+	p := struct {
+		Email     string `json:"email" validate:"required, min=1"`
+		ExcludeId int    `json:"exclude_id"`
+	}{}
+
+	if ok := utils.BindAndValidate(c, &p); !ok {
+		return
+	}
+
+	ctx := c.Request().Context()
+	resp := response.New(c)
+
+	is, err := u.userSvc.IsEmailExist(ctx, p.Email, p.ExcludeId)
+	if err != nil {
+		resp.Error(cerror.ServerError.WithDebugs(err))
+		return
+	}
+	resp.Success(is)
+}
+
+// --- U ---
 func (t *Teacher) UpdateUser(c iris.Context) {
-	panic("implement me")
+	p := struct {
+		Id       int    `json:"id" validate:"required"`
+		NickName string `json:"nick_name" validate:"required"`
+		Phone    string `json:"phone" validate:"required"`
+		Email    string `json:"email" validate:"required"`
+		Password string `json:"password"`
+	}{}
+	if ok := utils.BindAndValidate(c, &p); !ok {
+		return
+	}
+
+	ctx := c.Request().Context()
+	resp := response.New(c)
+	columns := []string{"nick_name", "phone", "email"}
+
+	// Password 字段如果为空的话，就不修改
+	if p.Password != "" {
+		columns = append(columns, "password")
+	}
+
+	user := model.User{
+		Id:       p.Id,
+		NickName: p.NickName,
+		Phone:    p.Phone,
+		Email:    p.Email,
+		Password: p.Password,
+	}
+	err := t.userSvc.Update(ctx, &user, columns)
+	if err != nil {
+		if errors.Is(err, pg.ErrNoRows) {
+			resp.Error(cerror.NotFound.WithMsg("用户不存在"))
+			return
+		}
+		if cerr, ok := err.(cerror.IError); ok {
+			resp.Error(cerr)
+			return
+		}
+		resp.Error(cerror.ServerError.WithDebugs(err))
+		return
+	}
+
+	resp.Success(user)
 }
 
+// --- D ---
 func (t *Teacher) DeleteUser(c iris.Context) {
 	p := struct {
 		Id int `json:"id" validate:"required,min=1"`
@@ -120,8 +215,4 @@ func (t *Teacher) DeleteUser(c iris.Context) {
 		return
 	}
 	resp.Success()
-}
-
-func NewTeacher(userSvc service.IUser) *Teacher {
-	return &Teacher{userSvc: userSvc}
 }

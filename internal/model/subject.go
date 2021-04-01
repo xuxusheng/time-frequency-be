@@ -12,9 +12,9 @@ type Subject struct {
 	Description string `json:"description" pg:",use_zero,notnull,default:''"` // 科目描述
 
 	// --- 关联字段
-	LearningMaterials []*LearningMaterial `json:"learning_materials" pg:"rel:has-many"` // 科目下包含的所有学习资料
-	CreatedById       int                 `json:"-" pg:",notnull"`                      // 创建人ID
-	CreatedBy         *User               `json:"created_by" pg:"rel:has-one"`          // 创建人
+	LearningMaterials []*LearningMaterial `json:"-" pg:"rel:has-many"` // 科目下包含的所有学习资料
+	CreatedById       int                 `json:"-" pg:",notnull"`     // 创建人ID
+	CreatedBy         *User               `json:"-" pg:"rel:has-one"`  // 创建人
 
 	// --- 通用字段 ---
 	Id        int       `json:"id"`

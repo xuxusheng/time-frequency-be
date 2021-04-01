@@ -15,13 +15,13 @@ type LearningMaterial struct {
 
 	// --- 关联字段 ---
 	SubjectId int      `json:"-"`
-	Subject   *Subject `json:"subject" pg:"rel:has-one"` // 资料所属的科目
+	Subject   *Subject `json:"-" pg:"rel:has-one"` // 资料所属的科目
 
-	CreatedById int   `json:"-" pg:",notnull"`             // 资料的创建人 ID
-	CreatedBy   *User `json:"created_by" pg:"rel:has-one"` // 资料的创建人
+	CreatedById int   `json:"-" pg:",notnull"`    // 资料的创建人 ID
+	CreatedBy   *User `json:"-" pg:"rel:has-one"` // 资料的创建人
 
-	UpdatedById int   `json:"-" pg:",notnull"`             // 资料的更新人 ID
-	UpdatedBy   *User `json:"updated_by" pg:"rel:has-one"` // 资料的更新人
+	UpdatedById int   `json:"-" pg:",notnull"`    // 资料的更新人 ID
+	UpdatedBy   *User `json:"-" pg:"rel:has-one"` // 资料的更新人
 
 	// --- 通用字段 ---
 	Id        int       `json:"id"`

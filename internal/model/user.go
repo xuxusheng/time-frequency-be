@@ -12,15 +12,15 @@ type User struct {
 	NickName string `json:"nick_name" pg:",notnull"`
 	Phone    string `json:"phone" pg:",unique,notnull"`          // 手机号
 	Email    string `json:"email" pg:",unique,notnull"`          // 邮箱
-	Role     string `json:"role" pg:",notnull,default:'member'"` // 用户角色，admin 管理员，member 普通成员
+	Role     string `json:"role" pg:",notnull,default:'member'"` // 用户角色，admin 管理员，teacher 老师，student 学生
 	Password string `json:"-" pg:",notnull"`
 
 	// --- 关联字段 ---
 	ClassId int    `json:"-"`
-	Class   *Class `json:"class" pg:"rel:has-one"` // 用户所属的班级
+	Class   *Class `json:"-" pg:"rel:has-one"` // 用户所属的班级
 
 	CreatedById int   `json:"-"`
-	CreatedBy   *User `json:"created_by" pg:"rel:has-one"` // 用户的创建人
+	CreatedBy   *User `json:"-" pg:"rel:has-one"` // 用户的创建人
 
 	LearningMaterials []*LearningMaterial `json:"-" pg:"rel:has-many"` // 由用户上传的学习资料
 
