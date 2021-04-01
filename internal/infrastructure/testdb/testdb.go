@@ -1,18 +1,24 @@
 package testdb
 
 import (
-	"context"
 	"github.com/go-pg/pg/v10"
 	"github.com/xuxusheng/time-frequency-be/internal/infrastructure/database"
+	"github.com/xuxusheng/time-frequency-be/internal/infrastructure/setting"
 )
 
 func New() (*pg.DB, error) {
-	db, err := database.New(context.Background(), &pg.Options{
-		Addr:     "localhost:5432",
-		User:     "postgres",
-		Password: "1234",
-		Database: "example2",
-	})
+	s := setting.Setting{
+		DB: &setting.DB{
+			Host:     "localhost:5432",
+			User:     "postgres",
+			Password: "1234",
+			Database: "example2",
+		},
+		Server: &setting.Server{
+			Mode: "test",
+		},
+	}
+	db, err := database.New(&s)
 	if err != nil {
 		return nil, err
 	}
