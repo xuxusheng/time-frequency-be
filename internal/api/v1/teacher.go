@@ -14,16 +14,16 @@ import (
 
 // 老师角色才能调用的接口
 type ITeacher interface {
-	CreateUser(c iris.Context) // 创建用户
+	CreateStudent(c iris.Context) // 创建用户
 
-	ListUser(c iris.Context) // 查询用户列表
+	ListStudent(c iris.Context) // 查询学生列表
 	IsNameExist(c iris.Context)
 	IsPhoneExist(c iris.Context)
 	IsEmailExist(c iris.Context)
 
 	UpdateUser(c iris.Context) // 修改用户信息，老师修改时，允许修改用户名和昵称
 
-	DeleteUser(c iris.Context) // 删除用户
+	DeleteStudent(c iris.Context) // 删除用户
 }
 
 type Teacher struct {
@@ -35,7 +35,7 @@ func NewTeacher(userSvc service.IUser) *Teacher {
 }
 
 // --- C ---
-func (t *Teacher) CreateUser(c iris.Context) {
+func (t *Teacher) CreateStudent(c iris.Context) {
 	p := struct {
 		Name     string `json:"name" validate:"required"`
 		NickName string `json:"nick_name" validate:"required"`
@@ -51,7 +51,17 @@ func (t *Teacher) CreateUser(c iris.Context) {
 
 	claims := jwt.Get(c).(*model.JWTClaims)
 
-	user, err := t.userSvc.Create(ctx, claims.Uid, p.Name, p.NickName, p.Phone, p.Email, p.Password)
+	user := model.User{
+		CreatedById: claims.Uid,
+		Name:        p.Name,
+		NickName:    p.NickName,
+		Phone:       p.Phone,
+		Email:       p.Email,
+		Role:        "student",
+		IsAdmin:     false,
+		Password:    p.Password,
+	}
+	err := t.userSvc.Create(ctx, &user)
 	if err != nil {
 		if cerr, ok := err.(cerror.IError); ok {
 			resp.Error(cerr)
@@ -65,21 +75,21 @@ func (t *Teacher) CreateUser(c iris.Context) {
 }
 
 // --- R ---
-func (t *Teacher) ListUser(c iris.Context) {
+func (t *Teacher) ListStudent(c iris.Context) {
 	p := struct {
 		Query string `json:"query"`
 		Pn    int    `json:"pn"`
 		Ps    int    `json:"ps"`
 	}{}
-	ctx := c.Request().Context()
-	resp := response.New(c)
 	if ok := utils.BindAndValidate(c, &p); !ok {
 		return
 	}
 
+	ctx := c.Request().Context()
+	resp := response.New(c)
 	page := model.NewPage(p.Pn, p.Ps)
 
-	users, count, err := t.userSvc.ListAndCount(ctx, p.Query, page)
+	users, count, err := t.userSvc.ListAndCount(ctx, page, p.Query, "student")
 	if err != nil {
 		resp.Error(cerror.ServerError.WithDebugs(err))
 		return
@@ -89,7 +99,7 @@ func (t *Teacher) ListUser(c iris.Context) {
 	resp.SuccessList(users, page)
 }
 
-func (u User) IsNameExist(c iris.Context) {
+func (t *Teacher) IsNameExist(c iris.Context) {
 	p := struct {
 		Name      string `json:"name" validate:"required, min=1"`
 		ExcludeId int    `json:"exclude_id"`
@@ -102,7 +112,7 @@ func (u User) IsNameExist(c iris.Context) {
 	ctx := c.Request().Context()
 	resp := response.New(c)
 
-	is, err := u.userSvc.IsNameExist(ctx, p.Name, p.ExcludeId)
+	is, err := t.userSvc.IsNameExist(ctx, p.Name, p.ExcludeId)
 	if err != nil {
 		resp.Error(cerror.ServerError.WithDebugs(err))
 		return
@@ -110,7 +120,7 @@ func (u User) IsNameExist(c iris.Context) {
 	resp.Success(is)
 }
 
-func (u User) IsPhoneExist(c iris.Context) {
+func (t *Teacher) IsPhoneExist(c iris.Context) {
 	p := struct {
 		Phone     string `json:"phone" validate:"required, min=1"`
 		ExcludeId int    `json:"exclude_id"`
@@ -123,7 +133,7 @@ func (u User) IsPhoneExist(c iris.Context) {
 	ctx := c.Request().Context()
 	resp := response.New(c)
 
-	is, err := u.userSvc.IsPhoneExist(ctx, p.Phone, p.ExcludeId)
+	is, err := t.userSvc.IsPhoneExist(ctx, p.Phone, p.ExcludeId)
 	if err != nil {
 		resp.Error(cerror.ServerError.WithDebugs(err))
 		return
@@ -131,7 +141,7 @@ func (u User) IsPhoneExist(c iris.Context) {
 	resp.Success(is)
 }
 
-func (u User) IsEmailExist(c iris.Context) {
+func (t *Teacher) IsEmailExist(c iris.Context) {
 	p := struct {
 		Email     string `json:"email" validate:"required, min=1"`
 		ExcludeId int    `json:"exclude_id"`
@@ -144,7 +154,7 @@ func (u User) IsEmailExist(c iris.Context) {
 	ctx := c.Request().Context()
 	resp := response.New(c)
 
-	is, err := u.userSvc.IsEmailExist(ctx, p.Email, p.ExcludeId)
+	is, err := t.userSvc.IsEmailExist(ctx, p.Email, p.ExcludeId)
 	if err != nil {
 		resp.Error(cerror.ServerError.WithDebugs(err))
 		return
@@ -199,7 +209,7 @@ func (t *Teacher) UpdateUser(c iris.Context) {
 }
 
 // --- D ---
-func (t *Teacher) DeleteUser(c iris.Context) {
+func (t *Teacher) DeleteStudent(c iris.Context) {
 	p := struct {
 		Id int `json:"id" validate:"required,min=1"`
 	}{}
@@ -209,7 +219,23 @@ func (t *Teacher) DeleteUser(c iris.Context) {
 		return
 	}
 
-	err := t.userSvc.Delete(ctx, p.Id)
+	user, err := t.userSvc.Get(ctx, p.Id)
+	if err != nil {
+		if errors.Is(err, pg.ErrNoRows) {
+			resp.Error(cerror.NotFound.WithMsg("用户不存在"))
+			return
+		}
+		resp.Error(cerror.ServerError.WithDebugs(err))
+		return
+	}
+
+	// 验证被删除的用户是否是学生
+	if user.Role != "student" {
+		resp.Error(cerror.Forbidden.WithMsg("无权删除非学生账号，请联系管理员"))
+		return
+	}
+
+	err = t.userSvc.Delete(ctx, p.Id)
 	if err != nil {
 		resp.Error(cerror.ServerError.WithDebugs(err))
 		return

@@ -46,5 +46,11 @@ func New(setting *setting.Setting) (*pg.DB, error) {
 			return nil, errors.Wrap(err, "创建数据表失败")
 		}
 	}
+
+	err := seedAdmin(ctx, db)
+	if err != nil {
+		return nil, errors.Wrap(err, "初始化管理员账户失败")
+	}
+
 	return db, nil
 }

@@ -9,11 +9,11 @@ import (
 )
 
 type IUser interface {
-	Create(ctx context.Context, createdById int, name, nickName, phone, email, password string) (*model.User, error)
+	Create(ctx context.Context, user *model.User) error
 
 	Get(ctx context.Context, id int) (*model.User, error)
 	GetByName(ctx context.Context, name string) (*model.User, error)
-	ListAndCount(ctx context.Context, query string, p *model.Page) ([]*model.User, int, error)
+	ListAndCount(ctx context.Context, p *model.Page, query, role string) ([]*model.User, int, error)
 	IsNameExist(ctx context.Context, name string, excludeId int) (bool, error)   // 查询用户名是否被占用
 	IsPhoneExist(ctx context.Context, phone string, excludeId int) (bool, error) // 查询手机号是否被占用
 	IsEmailExist(ctx context.Context, email string, excludeId int) (bool, error) // 查询邮箱是否被占用
@@ -32,46 +32,43 @@ type User struct {
 	Dao dao.IUser
 }
 
-func (u *User) Create(ctx context.Context, createdById int, name, nickName, phone, email, password string) (*model.User, error) {
+func (u *User) Create(ctx context.Context, user *model.User) error {
 	d := u.Dao
 	// 判断用户名是否已存在
-	is, err := d.IsNameExist(ctx, name, 0)
+	is, err := d.IsNameExist(ctx, user.Name, 0)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if is {
-		return nil, cerror.BadRequest.WithMsg("用户名已存在")
+		return cerror.BadRequest.WithMsg("用户名已存在")
 	}
 
 	// 判断手机号是否已存在
-	is, err = d.IsPhoneExist(ctx, phone, 0)
+	is, err = d.IsPhoneExist(ctx, user.Phone, 0)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if is {
-		return nil, cerror.BadRequest.WithMsg("手机号已存在")
+		return cerror.BadRequest.WithMsg("手机号已存在")
 	}
 
 	// 判断邮箱是否已存在
-	is, err = d.IsEmailExist(ctx, email, 0)
+	is, err = d.IsEmailExist(ctx, user.Email, 0)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if is {
-		return nil, cerror.BadRequest.WithMsg("邮箱已存在")
+		return cerror.BadRequest.WithMsg("邮箱已存在")
 	}
 
 	// 计算密码 hash
-	hash, err := utils.EncodePwd(password)
+	hash, err := utils.EncodePwd(user.Password)
 	if err != nil {
-		return nil, err
+		return err
 	}
+	user.Password = hash
 
-	user, err := d.Create(ctx, createdById, name, nickName, phone, email, hash)
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
+	return d.Create(ctx, user)
 }
 
 func (u *User) Get(ctx context.Context, id int) (*model.User, error) {
@@ -82,8 +79,8 @@ func (u *User) GetByName(ctx context.Context, name string) (*model.User, error) 
 	return u.Dao.GetByName(ctx, name)
 }
 
-func (u *User) ListAndCount(ctx context.Context, query string, p *model.Page) ([]*model.User, int, error) {
-	return u.Dao.ListAndCount(ctx, query, p)
+func (u *User) ListAndCount(ctx context.Context, p *model.Page, query, role string) ([]*model.User, int, error) {
+	return u.Dao.ListAndCount(ctx, p, query, role)
 }
 
 func (u *User) UpdatePhoneAndEmail(ctx context.Context, id int, phone, email string) (*model.User, error) {
@@ -129,7 +126,7 @@ func (u *User) Update(ctx context.Context, user *model.User, columns []string) e
 
 	// Phone 是否已被占用
 	if user.Phone != "" {
-		is, err := u.Dao.IsPhoneExist(ctx, user.Name, user.Id)
+		is, err := u.Dao.IsPhoneExist(ctx, user.Phone, user.Id)
 		if err != nil {
 			return err
 		}
@@ -140,7 +137,7 @@ func (u *User) Update(ctx context.Context, user *model.User, columns []string) e
 
 	// Email 是否已被占用
 	if user.Email != "" {
-		is, err := u.Dao.IsEmailExist(ctx, user.Name, user.Id)
+		is, err := u.Dao.IsEmailExist(ctx, user.Email, user.Id)
 		if err != nil {
 			return err
 		}
