@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"github.com/go-pg/pg/v10"
 	"github.com/xuxusheng/time-frequency-be/global"
 	"github.com/xuxusheng/time-frequency-be/internal/app"
@@ -18,7 +17,7 @@ func main() {
 		log.Fatalf("初始化全局配置项失败：%v", err)
 	}
 
-	global.DB, err = setupDB(global.Setting.DB)
+	global.DB, err = setupDB(global.Setting)
 	if err != nil {
 		log.Fatalf("初始化数据库连接失败：%v", err)
 	}
@@ -44,13 +43,8 @@ func setupSetting() (*setting.Setting, error) {
 }
 
 // 初始化数据库连接
-func setupDB(s *setting.DB) (*pg.DB, error) {
-	db, err := database.New(context.Background(), &pg.Options{
-		Database: s.Database,
-		Addr:     s.Host,
-		User:     s.User,
-		Password: s.Password,
-	})
+func setupDB(s *setting.Setting) (*pg.DB, error) {
+	db, err := database.New(s)
 	if err != nil {
 		return nil, err
 	}

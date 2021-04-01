@@ -7,6 +7,7 @@ require (
 	github.com/Joker/hpp v1.0.0 // indirect
 	github.com/Shopify/goreferrer v0.0.0-20210305184658-1a4fe54f556d // indirect
 	github.com/fsnotify/fsnotify v1.4.9
+	github.com/go-pg/pg/extra/pgdebug v0.2.0 // indirect
 	github.com/go-pg/pg/v10 v10.9.0
 	github.com/go-playground/locales v0.13.0
 	github.com/go-playground/universal-translator v0.17.0
