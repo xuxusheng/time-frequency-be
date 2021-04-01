@@ -19,6 +19,7 @@ type IUser interface {
 
 	// 用户自身只允许改自己的手机号和邮箱
 	Update(c iris.Context)
+	UpdatePassword(c iris.Context)
 
 	Login(c iris.Context)
 }
@@ -49,7 +50,6 @@ func (u *User) Me(c iris.Context) {
 // --- U ---
 func (u User) Update(c iris.Context) {
 	p := struct {
-		Id    int    `json:"id" validate:"required,min=1"`
 		Phone string `json:"phone" validate:"required"`
 		Email string `json:"email" validate:"required"`
 	}{}
@@ -59,13 +59,43 @@ func (u User) Update(c iris.Context) {
 
 	ctx := c.Request().Context()
 	resp := response.New(c)
+	claims := jwt.Get(c).(*model.JWTClaims)
 
 	user := model.User{
-		Id:    p.Id,
+		Id:    claims.Uid,
 		Phone: p.Phone,
 		Email: p.Email,
 	}
 	err := u.userSvc.Update(ctx, &user, []string{"phone", "email"})
+	if err != nil {
+		if errors.Is(err, pg.ErrNoRows) {
+			resp.Error(cerror.NotFound.WithMsg("用户不存在"))
+			return
+		}
+		if cerr, ok := err.(cerror.IError); ok {
+			resp.Error(cerr)
+			return
+		}
+		resp.Error(cerror.ServerError.WithDebugs(err))
+		return
+	}
+	resp.Success(user)
+}
+
+func (u *User) UpdatePassword(c iris.Context) {
+	p := struct {
+		OldPassword string `json:"old_password" validate:"required"`
+		NewPassword string `json:"new_password" validate:"required"`
+	}{}
+	if ok := utils.BindAndValidate(c, &p); !ok {
+		return
+	}
+
+	ctx := c.Request().Context()
+	resp := response.New(c)
+	claims := jwt.Get(c).(*model.JWTClaims)
+
+	user, err := u.userSvc.UpdatePassword(ctx, claims.Uid, p.OldPassword, p.NewPassword)
 	if err != nil {
 		if errors.Is(err, pg.ErrNoRows) {
 			resp.Error(cerror.NotFound.WithMsg("用户不存在"))

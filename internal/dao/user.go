@@ -9,13 +9,13 @@ import (
 
 type IUser interface {
 	// 创建用户
-	Create(ctx context.Context, createdBy int, name, nickName, phone, email, password string) (*model.User, error)
+	Create(ctx context.Context, user *model.User) error
 	// 获取单个用户
 	Get(ctx context.Context, id int) (*model.User, error)
 	// 通过 Name 获取用户
 	GetByName(ctx context.Context, name string) (*model.User, error)
 	// 获取多个用户
-	ListAndCount(ctx context.Context, query string, p *model.Page) ([]*model.User, int, error)
+	ListAndCount(ctx context.Context, p *model.Page, query, role string) ([]*model.User, int, error)
 	// 更新用户信息
 	Update(ctx context.Context, user *model.User, columns []string) error
 	// 删除用户
@@ -38,22 +38,14 @@ type User struct {
 	db orm.DB
 }
 
-func (u *User) Create(ctx context.Context, createdBy int, name, nickName, phone, email, password string) (*model.User, error) {
-	user := model.User{
-		Name:        name,
-		NickName:    nickName,
-		Phone:       phone,
-		Email:       email,
-		Password:    password,
-		CreatedById: createdBy,
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
-	}
-	_, err := u.db.ModelContext(ctx, &user).Returning("*").Insert()
+func (u *User) Create(ctx context.Context, user *model.User) error {
+	user.CreatedAt = time.Now()
+	user.UpdatedAt = time.Now()
+	_, err := u.db.ModelContext(ctx, user).Returning("*").Insert()
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return &user, nil
+	return nil
 }
 
 func (u *User) Get(ctx context.Context, id int) (*model.User, error) {
@@ -74,15 +66,22 @@ func (u *User) GetByName(ctx context.Context, name string) (*model.User, error) 
 	return &user, err
 }
 
-func (u *User) ListAndCount(ctx context.Context, query string, p *model.Page) ([]*model.User, int, error) {
+func (u *User) ListAndCount(ctx context.Context, p *model.Page, query, role string) ([]*model.User, int, error) {
 	users := []*model.User{}
-	count, err := u.db.ModelContext(ctx, &users).
+	db := u.db.ModelContext(ctx, &users).
 		Offset(p.Offset()).
 		Limit(p.Limit()).
-		Where("name LIKE ?", "%"+query+"%").
-		WhereOr("phone LIKE ?", "%"+query+"%").
-		WhereOr("email LIKE ?", "%"+query+"%").
-		SelectAndCount()
+		WhereGroup(func(q *orm.Query) (*orm.Query, error) {
+			q = q.WhereOr("name LIKE ?", "%"+query+"%").
+				WhereOr("nick_name LIKE ?", "%"+query+"%").
+				WhereOr("phone LIKE ?", "%"+query+"%").
+				WhereOr("email LIKE ?", "%"+query+"%")
+			return q, nil
+		})
+	if role != "" {
+		db = db.Where("role = ?", role)
+	}
+	count, err := db.SelectAndCount()
 	if err != nil {
 		return nil, 0, err
 	}
