@@ -18,8 +18,6 @@ type IUser interface {
 	ListAndCount(ctx context.Context, query string, p *model.Page) ([]*model.User, int, error)
 	// 更新用户信息
 	Update(ctx context.Context, user *model.User, columns []string) error
-	// 更新密码
-	UpdatePassword(ctx context.Context, id int, password string) (*model.User, error)
 	// 删除用户
 	Delete(ctx context.Context, id int) error
 	// 用户名是否存在
@@ -77,7 +75,7 @@ func (u *User) GetByName(ctx context.Context, name string) (*model.User, error) 
 }
 
 func (u *User) ListAndCount(ctx context.Context, query string, p *model.Page) ([]*model.User, int, error) {
-	var users []*model.User
+	users := []*model.User{}
 	count, err := u.db.ModelContext(ctx, &users).
 		Offset(p.Offset()).
 		Limit(p.Limit()).
@@ -102,20 +100,6 @@ func (u *User) Update(ctx context.Context, user *model.User, columns []string) e
 		return err
 	}
 	return nil
-}
-
-func (u *User) UpdatePassword(ctx context.Context, id int, password string) (*model.User, error) {
-	user := model.User{Id: id, Password: password}
-	_, err := u.db.
-		ModelContext(ctx, &user).
-		Column("password").
-		WherePK().
-		Returning("*").
-		Update()
-	if err != nil {
-		return nil, err
-	}
-	return &user, err
 }
 
 func (u *User) Delete(ctx context.Context, id int) error {

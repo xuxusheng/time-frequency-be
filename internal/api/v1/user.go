@@ -16,9 +16,6 @@ import (
 // 普通用户具有权限的接口
 type IUser interface {
 	Me(c iris.Context)
-	IsNameExist(c iris.Context)
-	IsPhoneExist(c iris.Context)
-	IsEmailExist(c iris.Context)
 
 	// 用户自身只允许改自己的手机号和邮箱
 	Update(c iris.Context)
@@ -34,6 +31,7 @@ func NewUser(userSvc service.IUser) *User {
 	return &User{userSvc: userSvc}
 }
 
+// --- R ---
 func (u *User) Me(c iris.Context) {
 	ctx := c.Request().Context()
 	resp := response.New(c)
@@ -45,48 +43,29 @@ func (u *User) Me(c iris.Context) {
 		return
 	}
 
-	resp.Success(iris.Map{
-		"id":         user.Id,
-		"name":       user.Name,
-		"nick_name":  user.NickName,
-		"phone":      user.Phone,
-		"email":      user.Email,
-		"role":       user.Role,
-		"created_at": user.CreatedAt,
-		"updated_at": user.UpdatedAt,
-	})
-}
-
-func (u User) IsNameExist(c iris.Context) {
-	panic("implement me")
-}
-
-func (u User) IsPhoneExist(c iris.Context) {
-	panic("implement me")
-}
-
-func (u User) IsEmailExist(c iris.Context) {
-	panic("implement me")
+	resp.Success(user)
 }
 
 // --- U ---
-
-type UserUpdateReq struct {
-	Id    int    `json:"id" validate:"required,min=1"`
-	Phone string `json:"phone" validate:"required"`
-	Email string `json:"email" validate:"required"`
-}
-
 func (u User) Update(c iris.Context) {
-	ctx := c.Request().Context()
-	resp := response.New(c)
-
-	p := UserUpdateReq{}
+	p := struct {
+		Id    int    `json:"id" validate:"required,min=1"`
+		Phone string `json:"phone" validate:"required"`
+		Email string `json:"email" validate:"required"`
+	}{}
 	if ok := utils.BindAndValidate(c, &p); !ok {
 		return
 	}
 
-	user, err := u.userSvc.UpdatePhoneAndEmail(ctx, p.Id, p.Phone, p.Email)
+	ctx := c.Request().Context()
+	resp := response.New(c)
+
+	user := model.User{
+		Id:    p.Id,
+		Phone: p.Phone,
+		Email: p.Email,
+	}
+	err := u.userSvc.Update(ctx, &user, []string{"phone", "email"})
 	if err != nil {
 		if errors.Is(err, pg.ErrNoRows) {
 			resp.Error(cerror.NotFound.WithMsg("用户不存在"))
@@ -99,30 +78,21 @@ func (u User) Update(c iris.Context) {
 		resp.Error(cerror.ServerError.WithDebugs(err))
 		return
 	}
-	resp.Success(iris.Map{
-		"id":         user.Id,
-		"name":       user.Name,
-		"phone":      user.Phone,
-		"email":      user.Email,
-		"created_at": user.CreatedAt,
-		"updated_at": user.UpdatedAt,
-	})
+	resp.Success(user)
 }
 
 // --- AUTH ---
-type LoginReq struct {
-	Name     string `json:"name" validate:"required"`
-	Password string `json:"password" validate:"required"`
-}
-
 func (u User) Login(c iris.Context) {
-	ctx := c.Request().Context()
-	resp := response.New(c)
-
-	p := LoginReq{}
+	p := struct {
+		Name     string `json:"name" validate:"required"`
+		Password string `json:"password" validate:"required"`
+	}{}
 	if ok := utils.BindAndValidate(c, &p); !ok {
 		return
 	}
+
+	ctx := c.Request().Context()
+	resp := response.New(c)
 
 	svc := u.userSvc
 
@@ -156,9 +126,6 @@ func (u User) Login(c iris.Context) {
 	}
 	resp.Success(iris.Map{
 		"token": string(token),
-		"user": iris.Map{
-			"id":   user.Id,
-			"name": user.Name,
-		},
+		"user":  user,
 	})
 }

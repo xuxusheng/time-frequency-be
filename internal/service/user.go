@@ -18,7 +18,7 @@ type IUser interface {
 	IsPhoneExist(ctx context.Context, phone string, excludeId int) (bool, error) // 查询手机号是否被占用
 	IsEmailExist(ctx context.Context, email string, excludeId int) (bool, error) // 查询邮箱是否被占用
 
-	UpdatePhoneAndEmail(ctx context.Context, id int, phone, email string) (*model.User, error)
+	Update(ctx context.Context, user *model.User, columns []string) error
 	UpdatePassword(ctx context.Context, id int, oldPassword, newPassword string) (*model.User, error)
 
 	Delete(ctx context.Context, id int) error
@@ -88,14 +88,6 @@ func (u *User) ListAndCount(ctx context.Context, query string, p *model.Page) ([
 
 func (u *User) UpdatePhoneAndEmail(ctx context.Context, id int, phone, email string) (*model.User, error) {
 	d := u.Dao
-	//// 判断用户名是否被占用
-	//is, err := d.IsNameExist(ctx, name, id)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//if is {
-	//	return nil, cerror.BadRequest.WithMsg("用户名已存在")
-	//}
 	is, err := d.IsPhoneExist(ctx, phone, id)
 	if err != nil {
 		return nil, err
@@ -123,6 +115,52 @@ func (u *User) UpdatePhoneAndEmail(ctx context.Context, id int, phone, email str
 	return &user, nil
 }
 
+func (u *User) Update(ctx context.Context, user *model.User, columns []string) error {
+	// 判断 user.Name 是否已被占用
+	if user.Name != "" {
+		is, err := u.Dao.IsNameExist(ctx, user.Name, user.Id)
+		if err != nil {
+			return err
+		}
+		if is {
+			return cerror.BadRequest.WithMsg("用户名已被占用")
+		}
+	}
+
+	// Phone 是否已被占用
+	if user.Phone != "" {
+		is, err := u.Dao.IsPhoneExist(ctx, user.Name, user.Id)
+		if err != nil {
+			return err
+		}
+		if is {
+			return cerror.BadRequest.WithMsg("手机号已被占用")
+		}
+	}
+
+	// Email 是否已被占用
+	if user.Email != "" {
+		is, err := u.Dao.IsEmailExist(ctx, user.Name, user.Id)
+		if err != nil {
+			return err
+		}
+		if is {
+			return cerror.BadRequest.WithMsg("邮箱已被占用")
+		}
+	}
+
+	// 计算密码 Hash 值
+	if user.Password != "" {
+		// 计算新密码 Hash
+		hash, err := utils.EncodePwd(user.Password)
+		if err != nil {
+			return err
+		}
+		user.Password = hash
+	}
+	return u.Dao.Update(ctx, user, columns)
+}
+
 func (u *User) UpdatePassword(ctx context.Context, id int, oldPassword, newPassword string) (*model.User, error) {
 	d := u.Dao
 
@@ -144,7 +182,8 @@ func (u *User) UpdatePassword(ctx context.Context, id int, oldPassword, newPassw
 	}
 
 	// 更新密码
-	user, err = d.UpdatePassword(ctx, id, hash)
+	user.Password = hash
+	err = d.Update(ctx, user, []string{"password"})
 	if err != nil {
 		return nil, err
 	}
