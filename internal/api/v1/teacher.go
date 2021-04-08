@@ -57,7 +57,7 @@ func (t *Teacher) CreateStudent(c iris.Context) {
 		NickName:    p.NickName,
 		Phone:       p.Phone,
 		Email:       p.Email,
-		Role:        "student",
+		Role:        model.UserRoleStudent,
 		IsAdmin:     false,
 		Password:    p.Password,
 	}
