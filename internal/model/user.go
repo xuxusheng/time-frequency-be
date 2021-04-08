@@ -2,6 +2,11 @@ package model
 
 import "time"
 
+const (
+	UserRoleStudent string = "student"
+	UserRoleTeacher string = "teacher"
+)
+
 // 用户表
 type User struct {
 	// --- 表名 ---

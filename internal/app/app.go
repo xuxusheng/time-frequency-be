@@ -51,6 +51,7 @@ func New() *iris.Application {
 	{
 		adminApi := apiV1.Party("/admin")
 		adminApi.Use(middleware.IsAdmin())
+		adminApi.Post("/create-user", admin.CreateUser)
 		adminApi.Post("/list-user", admin.ListUser)
 		adminApi.Post("/toggle-admin", admin.ToggleAdmin)
 	}
