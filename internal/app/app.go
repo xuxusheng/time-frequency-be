@@ -1,9 +1,12 @@
 package app
 
 import (
+	"github.com/iris-contrib/swagger/v12"
+	"github.com/iris-contrib/swagger/v12/swaggerFiles"
 	"github.com/kataras/iris/v12"
+	_ "github.com/xuxusheng/time-frequency-be/docs"
 	"github.com/xuxusheng/time-frequency-be/global"
-	v1 "github.com/xuxusheng/time-frequency-be/internal/api/v1"
+	"github.com/xuxusheng/time-frequency-be/internal/api/v1"
 	"github.com/xuxusheng/time-frequency-be/internal/dao"
 	"github.com/xuxusheng/time-frequency-be/internal/infrastructure/middleware"
 	"github.com/xuxusheng/time-frequency-be/internal/service"
@@ -17,6 +20,9 @@ func New() *iris.Application {
 	app.UseRouter(iris.Compression)
 
 	app.Use(middleware.Translations())
+
+	// Swagger
+	app.Get("/swagger/{any:path}", swagger.WrapHandler(swaggerFiles.Handler))
 
 	apiV1 := app.Party("/api/v1")
 

@@ -27,6 +27,21 @@ func NewAdmin(userSvc service.IUser) *Admin {
 	return &Admin{userSvc: userSvc}
 }
 
+// 创建新用户 godoc
+// @summary 创建新用户
+// @description 管理员创建新用户账号，可以指定用户角色和是否为管理员账户
+// @accept json
+// @produce json
+// @tags admin
+// @param name body string true "用户名，建议使用姓名拼音"
+// @param nick_name body string true "用户昵称，请使用真实姓名"
+// @param phone body string true "手机号"
+// @param email body string true "邮箱"
+// @param password body string true "密码"
+// @param role body string true "用户角色，student 学生或 teacher 老师"  Enums(student, teacher)
+// @param is_admin body bool true "是否是管理员"
+// @success 200 {object} swagger.Resp{data=model.User}
+// @router /api/v1/admin/create-user [post]
 func (a Admin) CreateUser(c iris.Context) {
 	p := struct {
 		Name     string `json:"name" validate:"required"`
@@ -63,12 +78,25 @@ func (a Admin) CreateUser(c iris.Context) {
 	resp.Success(user)
 }
 
+// 查询多个用户 godoc
+// @summary 查询多个用户
+// @description 管理员查询所有的用户账号
+// @accept json
+// @produce json
+// @tags admin
+// @param query body string true "模糊匹配用户名、昵称、手机号和邮箱"
+// @param role body string true "通过角色筛选老师或者学生"  Enums(student, teacher)
+// @param is_admin body int true "筛选是否是管理员，-1 不限、0 否、1 是" Enums(-1, 0, 1)
+// @param pn body int true "pn"
+// @param ps body int true "ps"
+// @success 200 {object} swagger.Resp{data=swagger.DWithP{data=model.User}}
+// @router /api/v1/admin/list-user [post]
 func (a Admin) ListUser(c iris.Context) {
 	p := struct {
-		Query string `json:"query"`
-		Role  string `json:"role"`
-		Pn    int    `json:"pn"`
-		Ps    int    `json:"ps"`
+		Query string `json:"query" validated:"required"`
+		Role  string `json:"role" validated:"required"`
+		Pn    int    `json:"pn" validated:"required"`
+		Ps    int    `json:"ps" validated:"required"`
 	}{}
 	if ok := utils.BindAndValidate(c, &p); !ok {
 		return
@@ -87,6 +115,16 @@ func (a Admin) ListUser(c iris.Context) {
 	resp.SuccessList(users, page)
 }
 
+// 修改账号管理员权限 godoc
+// @summary 修改账号管理员权限
+// @description 修改某个用户是否是管理员，不允许取消自己的管理员权限
+// @accept json
+// @produce json
+// @tags admin
+// @param id body int true "用户ID"
+// @param is_admin body bool true "是否管理员"
+// @success 200 {object} swagger.Resp
+// @router /api/v1/admin/toggle-admin [post]
 func (a Admin) ToggleAdmin(c iris.Context) {
 	p := struct {
 		Id      int  `json:"id"`
