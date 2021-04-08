@@ -9,6 +9,11 @@ import (
 	"log"
 )
 
+// @title 时频培训系统 API 接口文档
+// @version 1.0
+// @contact.name 许盛
+// @contact.email 20691718@qq.com
+// @host localhost:8080
 func main() {
 	var err error
 
