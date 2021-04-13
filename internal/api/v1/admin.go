@@ -130,7 +130,7 @@ func (a Admin) ListUser(c iris.Context) {
 // @param phone body string true "手机号"
 // @param email body string true "邮箱"
 // @param role body string true "用户角色" Enums(student, teacher)
-// @param password body string true "密码"
+// @param password body string false "用户密码，留空则不修改"
 // @success 200 {object} swagger.Resp{data=model.User}
 // @router /api/v1/admin/update-user [post]
 func (a Admin) UpdateUser(c iris.Context) {
@@ -141,7 +141,7 @@ func (a Admin) UpdateUser(c iris.Context) {
 		Phone    string `json:"phone" validate:"required"`
 		Email    string `json:"email" validated:"required"`
 		Role     string `json:"role" validated:"required,oneof=student teacher"`
-		Password string `json:"password" validated:"required"`
+		Password string `json:"password"`
 	}{}
 	if ok := utils.BindAndValidate(c, &p); !ok {
 		return
@@ -159,7 +159,12 @@ func (a Admin) UpdateUser(c iris.Context) {
 		Password: p.Password,
 		Role:     p.Role,
 	}
-	err := a.userSvc.Update(ctx, &user, []string{"name", "nick_name", "phone", "email", "role", "password"})
+	columns := []string{"name", "nick_name", "phone", "email", "role"}
+	// 如果参数中没有 password 或者 password 为空的话，就不修改用户密码
+	if user.Password != "" {
+		columns = append(columns, "password")
+	}
+	err := a.userSvc.Update(ctx, &user, columns)
 	if err != nil {
 		resp.Error(cerror.ServerError.WithDebugs(err))
 		return
