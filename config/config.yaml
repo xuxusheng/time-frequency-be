@@ -1,6 +1,6 @@
 Server:
   Mode: debug
-  HttpPort: 8080
+  HttpPort: 80
   ReadTimeout: 10s
   WriteTimeout: 10s
 App:

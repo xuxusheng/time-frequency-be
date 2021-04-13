@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"github.com/go-pg/pg/v10"
+	"github.com/kataras/iris/v12"
 	"github.com/xuxusheng/time-frequency-be/global"
 	"github.com/xuxusheng/time-frequency-be/internal/app"
 	"github.com/xuxusheng/time-frequency-be/internal/infrastructure/database"
@@ -29,7 +31,12 @@ func main() {
 
 	a := app.New()
 
-	a.Listen(":8080")
+	a.Run(
+		iris.Addr(fmt.Sprintf(":%d", global.Setting.Server.HttpPort)),
+		iris.WithoutInterruptHandler,
+		iris.WithoutBodyConsumptionOnUnmarshal,
+	)
+
 }
 
 // 初始化全局配置项
