@@ -51,9 +51,9 @@ func (a Admin) CreateUser(c iris.Context) {
 		Name     string `json:"name" validate:"required"`
 		NickName string `json:"nick_name" validate:"required"`
 		Phone    string `json:"phone" validate:"required"`
-		Email    string `json:"email" validated:"required"`
-		Password string `json:"password" validated:"required"`
-		Role     string `json:"role" validated:"required,oneof=student teacher"`
+		Email    string `json:"email" validate:"required"`
+		Password string `json:"password" validate:"required"`
+		Role     string `json:"role" validate:"required,oneof=student teacher"`
 		IsAdmin  bool   `json:"is_admin"`
 	}{}
 	if ok := utils.BindAndValidate(c, &p); !ok {
@@ -119,10 +119,10 @@ func (a Admin) GetUser(c iris.Context) {
 // @router /api/v1/admin/list-user [post]
 func (a Admin) ListUser(c iris.Context) {
 	p := struct {
-		Query string `json:"query" validated:"required"`
-		Role  string `json:"role" validated:"required"`
-		Pn    int    `json:"pn" validated:"required"`
-		Ps    int    `json:"ps" validated:"required"`
+		Query string `json:"query" validate:"required"`
+		Role  string `json:"role" validate:"required"`
+		Pn    int    `json:"pn" validate:"required"`
+		Ps    int    `json:"ps" validate:"required"`
 	}{}
 	if ok := utils.BindAndValidate(c, &p); !ok {
 		return
@@ -158,12 +158,12 @@ func (a Admin) ListUser(c iris.Context) {
 // @router /api/v1/admin/update-user [post]
 func (a Admin) UpdateUser(c iris.Context) {
 	p := struct {
-		Id       int    `json:"id" validated:"required"`
+		Id       int    `json:"id" validate:"required"`
 		Name     string `json:"name" validate:"required"`
 		NickName string `json:"nick_name" validate:"required"`
 		Phone    string `json:"phone" validate:"required"`
-		Email    string `json:"email" validated:"required"`
-		Role     string `json:"role" validated:"required,oneof=student teacher"`
+		Email    string `json:"email" validate:"required"`
+		Role     string `json:"role" validate:"required,oneof=student teacher"`
 		Password string `json:"password"`
 	}{}
 	if ok := utils.BindAndValidate(c, &p); !ok {
@@ -207,8 +207,8 @@ func (a Admin) UpdateUser(c iris.Context) {
 // @router /api/v1/admin/toggle-admin [post]
 func (a Admin) ToggleAdmin(c iris.Context) {
 	p := struct {
-		Id      int  `json:"id" validated:"required"`
-		IsAdmin bool `json:"is_admin" validated:"required"`
+		Id      int  `json:"id" validate:"required"`
+		IsAdmin bool `json:"is_admin" validate:"required"`
 	}{}
 	if ok := utils.BindAndValidate(c, &p); !ok {
 		return
@@ -247,7 +247,7 @@ func (a Admin) ToggleAdmin(c iris.Context) {
 // @router /api/v1/admin/delete-user [post]
 func (a Admin) DeleteUser(c iris.Context) {
 	p := struct {
-		Id int `json:"id" validated:"required"`
+		Id int `json:"id" validate:"required"`
 	}{}
 	if ok := utils.BindAndValidate(c, &p); !ok {
 		return
