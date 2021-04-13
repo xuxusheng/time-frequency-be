@@ -138,6 +138,28 @@ paths:
       summary: 创建新用户
       tags:
       - admin
+  /api/v1/admin/delete-user:
+    post:
+      consumes:
+      - application/json
+      description: 管理员删除某个账号
+      parameters:
+      - description: 用户ID
+        in: body
+        name: id
+        required: true
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/swagger.Resp'
+      summary: 删除账号
+      tags:
+      - admin
   /api/v1/admin/list-user:
     post:
       consumes:
@@ -227,6 +249,72 @@ paths:
           schema:
             $ref: '#/definitions/swagger.Resp'
       summary: 修改账号管理员权限
+      tags:
+      - admin
+  /api/v1/admin/update-user:
+    post:
+      consumes:
+      - application/json
+      description: 修改某个用户的信息（此接口不允许修改用户是否为管理员）
+      parameters:
+      - description: 用户ID
+        in: body
+        name: id
+        required: true
+        schema:
+          type: integer
+      - description: 用户名
+        in: body
+        name: name
+        required: true
+        schema:
+          type: string
+      - description: 用户昵称
+        in: body
+        name: nick_name
+        required: true
+        schema:
+          type: string
+      - description: 手机号
+        in: body
+        name: phone
+        required: true
+        schema:
+          type: string
+      - description: 邮箱
+        in: body
+        name: email
+        required: true
+        schema:
+          type: string
+      - description: 用户角色
+        enum:
+        - student
+        - teacher
+        in: body
+        name: role
+        required: true
+        schema:
+          type: string
+      - description: 密码
+        in: body
+        name: password
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/swagger.Resp'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.User'
+              type: object
+      summary: 修改用户信息
       tags:
       - admin
 swagger: "2.0"

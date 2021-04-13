@@ -70,6 +70,7 @@ func New() *iris.Application {
 		adminApi.Use(middleware.IsAdmin())
 		adminApi.Post("/create-user", admin.CreateUser)
 		adminApi.Post("/list-user", admin.ListUser)
+		adminApi.Post("/update-user", admin.UpdateUser)
 		adminApi.Post("/toggle-admin", admin.ToggleAdmin)
 		adminApi.Post("/delete-user", admin.DeleteUser)
 	}
