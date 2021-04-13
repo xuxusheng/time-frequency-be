@@ -68,6 +68,24 @@ func (s *Setting) Init() error {
 		return err
 	}
 
+	// 读取系统环境变量
+	err = FillEnv(s.Server)
+	if err != nil {
+		return err
+	}
+	err = FillEnv(s.App)
+	if err != nil {
+		return err
+	}
+	err = FillEnv(s.DB)
+	if err != nil {
+		return err
+	}
+	err = FillEnv(s.JWT)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
