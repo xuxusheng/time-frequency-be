@@ -75,7 +75,8 @@ func (u *User) ListAndCount(ctx context.Context, p *model.Page, query, role stri
 			q = q.WhereOr("name LIKE ?", "%"+query+"%").
 				WhereOr("nick_name LIKE ?", "%"+query+"%").
 				WhereOr("phone LIKE ?", "%"+query+"%").
-				WhereOr("email LIKE ?", "%"+query+"%")
+				WhereOr("email LIKE ?", "%"+query+"%").
+				Order("created_at DESC")
 			return q, nil
 		})
 	if role != "" {
@@ -89,6 +90,8 @@ func (u *User) ListAndCount(ctx context.Context, p *model.Page, query, role stri
 }
 
 func (u *User) Update(ctx context.Context, user *model.User, columns []string) error {
+	user.UpdatedAt = time.Now()
+	columns = append(columns, "updated_at")
 	_, err := u.db.
 		ModelContext(ctx, user).
 		Column(columns...).

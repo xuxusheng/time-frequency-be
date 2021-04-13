@@ -18,7 +18,7 @@ type User struct {
 	Phone    string `json:"phone" pg:",unique,notnull"`           // 手机号
 	Email    string `json:"email" pg:",unique,notnull"`           // 邮箱
 	Role     string `json:"role" pg:",notnull,default:'student'"` // 用户角色，teacher 老师，student 学生
-	IsAdmin  bool   `json:"is_admin" pg:",notnull,default:false"`
+	IsAdmin  bool   `json:"is_admin" pg:",use_zero,notnull,default:false"`
 	Password string `json:"-" pg:",notnull"`
 
 	// --- 关联字段 ---

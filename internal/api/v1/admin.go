@@ -127,8 +127,8 @@ func (a Admin) ListUser(c iris.Context) {
 // @router /api/v1/admin/toggle-admin [post]
 func (a Admin) ToggleAdmin(c iris.Context) {
 	p := struct {
-		Id      int  `json:"id"`
-		IsAdmin bool `json:"is_admin"`
+		Id      int  `json:"id" validated:"required"`
+		IsAdmin bool `json:"is_admin" validated:"required"`
 	}{}
 	if ok := utils.BindAndValidate(c, &p); !ok {
 		return
@@ -141,6 +141,7 @@ func (a Admin) ToggleAdmin(c iris.Context) {
 
 	if claims.Uid == p.Id && !p.IsAdmin {
 		resp.Error(cerror.BadRequest.WithMsg("无法取消自己的管理员权限"))
+		return
 	}
 
 	user := model.User{
