@@ -119,8 +119,8 @@ func (a Admin) GetUser(c iris.Context) {
 // @router /api/v1/admin/list-user [post]
 func (a Admin) ListUser(c iris.Context) {
 	p := struct {
-		Query string `json:"query" validate:"required"`
-		Role  string `json:"role" validate:"required"`
+		Query string `json:"query"`
+		Role  string `json:"role" validate:"omitempty,oneof=student teacher"`
 		Pn    int    `json:"pn" validate:"required"`
 		Ps    int    `json:"ps" validate:"required"`
 	}{}
