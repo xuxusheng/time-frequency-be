@@ -18,8 +18,19 @@ func New() *iris.Application {
 	app.Validator = global.Validator
 
 	app.UseRouter(iris.Compression)
-
 	app.Use(middleware.Translations())
+
+	// 健康检查
+	app.Get("/liveness", func(c iris.Context) {
+		c.StopWithStatus(iris.StatusNoContent)
+	})
+	app.Get("/readiness", func(c iris.Context) {
+		if global.DB != nil {
+			c.StopWithStatus(iris.StatusNoContent)
+			return
+		}
+		c.StopWithStatus(iris.StatusServiceUnavailable)
+	})
 
 	// Swagger
 	app.Get("/swagger/{any:path}", swagger.WrapHandler(swaggerFiles.Handler))
