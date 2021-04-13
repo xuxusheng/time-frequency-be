@@ -1,0 +1,232 @@
+definitions:
+  model.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        description: 邮箱
+        type: string
+      id:
+        description: '--- 通用字段 ---'
+        type: integer
+      is_admin:
+        type: boolean
+      name:
+        description: '--- 业务字段 ---'
+        type: string
+      nick_name:
+        type: string
+      phone:
+        description: 手机号
+        type: string
+      role:
+        description: 用户角色，teacher 老师，student 学生
+        type: string
+      updated_at:
+        type: string
+    type: object
+  swagger.DWithP:
+    properties:
+      data:
+        type: object
+      pn:
+        description: 当前页码
+        example: 1
+        type: integer
+      ps:
+        description: 每页显示多少条记录
+        example: 10
+        type: integer
+      total:
+        description: 总共多少条记录
+        example: 199
+        type: integer
+    type: object
+  swagger.Resp:
+    properties:
+      data:
+        type: object
+      err_code:
+        description: 错误码
+        example: 0
+        type: integer
+      err_debugs:
+        description: 错误调式信息
+        items:
+          type: string
+        type: array
+      err_details:
+        description: 错误详细信息
+        items:
+          type: string
+        type: array
+      err_msg:
+        description: 错误信息
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: 20691718@qq.com
+    name: 许盛
+  title: 时频培训系统 API 接口文档
+  version: "1.0"
+paths:
+  /api/v1/admin/create-user:
+    post:
+      consumes:
+      - application/json
+      description: 管理员创建新用户账号，可以指定用户角色和是否为管理员账户
+      parameters:
+      - description: 用户名，建议使用姓名拼音
+        in: body
+        name: name
+        required: true
+        schema:
+          type: string
+      - description: 用户昵称，请使用真实姓名
+        in: body
+        name: nick_name
+        required: true
+        schema:
+          type: string
+      - description: 手机号
+        in: body
+        name: phone
+        required: true
+        schema:
+          type: string
+      - description: 邮箱
+        in: body
+        name: email
+        required: true
+        schema:
+          type: string
+      - description: 密码
+        in: body
+        name: password
+        required: true
+        schema:
+          type: string
+      - description: 用户角色，student 学生或 teacher 老师
+        enum:
+        - student
+        - teacher
+        in: body
+        name: role
+        required: true
+        schema:
+          type: string
+      - description: 是否是管理员
+        in: body
+        name: is_admin
+        required: true
+        schema:
+          type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/swagger.Resp'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.User'
+              type: object
+      summary: 创建新用户
+      tags:
+      - admin
+  /api/v1/admin/list-user:
+    post:
+      consumes:
+      - application/json
+      description: 管理员查询所有的用户账号
+      parameters:
+      - description: 模糊匹配用户名、昵称、手机号和邮箱
+        in: body
+        name: query
+        required: true
+        schema:
+          type: string
+      - description: 通过角色筛选老师或者学生
+        enum:
+        - student
+        - teacher
+        in: body
+        name: role
+        required: true
+        schema:
+          type: string
+      - description: 筛选是否是管理员，-1 不限、0 否、1 是
+        enum:
+        - -1
+        - 0
+        - 1
+        in: body
+        name: is_admin
+        required: true
+        schema:
+          type: integer
+      - description: pn
+        in: body
+        name: pn
+        required: true
+        schema:
+          type: integer
+      - description: ps
+        in: body
+        name: ps
+        required: true
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/swagger.Resp'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/swagger.DWithP'
+                  - properties:
+                      data:
+                        $ref: '#/definitions/model.User'
+                    type: object
+              type: object
+      summary: 查询多个用户
+      tags:
+      - admin
+  /api/v1/admin/toggle-admin:
+    post:
+      consumes:
+      - application/json
+      description: 修改某个用户是否是管理员，不允许取消自己的管理员权限
+      parameters:
+      - description: 用户ID
+        in: body
+        name: id
+        required: true
+        schema:
+          type: integer
+      - description: 是否管理员
+        in: body
+        name: is_admin
+        required: true
+        schema:
+          type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/swagger.Resp'
+      summary: 修改账号管理员权限
+      tags:
+      - admin
+swagger: "2.0"
