@@ -71,6 +71,7 @@ func New() *iris.Application {
 		adminApi.Post("/create-user", admin.CreateUser)
 		adminApi.Post("/list-user", admin.ListUser)
 		adminApi.Post("/toggle-admin", admin.ToggleAdmin)
+		adminApi.Post("/delete-user", admin.DeleteUser)
 	}
 
 	return app

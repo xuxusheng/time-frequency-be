@@ -17,6 +17,8 @@ type IAdmin interface {
 	ListUser(c iris.Context) // 查询所有用户
 
 	ToggleAdmin(c iris.Context) // 切换用户是否为管理员
+
+	DeleteUser(c iris.Context) // 删除用户
 }
 
 type Admin struct {
@@ -149,6 +151,41 @@ func (a Admin) ToggleAdmin(c iris.Context) {
 		IsAdmin: p.IsAdmin,
 	}
 	err := a.userSvc.Update(ctx, &user, []string{"is_admin"})
+	if err != nil {
+		resp.Error(cerror.ServerError.WithDebugs(err))
+		return
+	}
+	resp.Success()
+}
+
+// 删除账号 godoc
+// @summary 删除账号
+// @description 管理员删除某个账号
+// @accept json
+// @produce json
+// @tags admin
+// @param id body int true "用户ID"
+// @success 200 {object} swagger.Resp
+// @router /api/v1/admin/delete-user [post[
+func (a Admin) DeleteUser(c iris.Context) {
+	p := struct {
+		Id int `json:"id" validated:"required"`
+	}{}
+	if ok := utils.BindAndValidate(c, &p); !ok {
+		return
+	}
+
+	ctx := c.Request().Context()
+	resp := response.New(c)
+
+	claims := jwt.Get(c).(*model.JWTClaims)
+
+	if claims.Uid == p.Id {
+		resp.Error(cerror.BadRequest.WithMsg("无法删除自己的账号"))
+		return
+	}
+
+	err := a.userSvc.Delete(ctx, p.Id)
 	if err != nil {
 		resp.Error(cerror.ServerError.WithDebugs(err))
 		return
