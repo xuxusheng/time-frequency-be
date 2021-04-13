@@ -169,7 +169,6 @@ paths:
       - description: 模糊匹配用户名、昵称、手机号和邮箱
         in: body
         name: query
-        required: true
         schema:
           type: string
       - description: 通过角色筛选老师或者学生
@@ -178,7 +177,6 @@ paths:
         - teacher
         in: body
         name: role
-        required: true
         schema:
           type: string
       - description: 筛选是否是管理员，-1 不限、0 否、1 是
@@ -238,7 +236,6 @@ paths:
       - description: 是否管理员
         in: body
         name: is_admin
-        required: true
         schema:
           type: boolean
       produces:
@@ -296,10 +293,9 @@ paths:
         required: true
         schema:
           type: string
-      - description: 密码
+      - description: 用户密码，留空则不修改
         in: body
         name: password
-        required: true
         schema:
           type: string
       produces:

@@ -110,8 +110,8 @@ func (a Admin) GetUser(c iris.Context) {
 // @accept json
 // @produce json
 // @tags admin
-// @param query body string true "模糊匹配用户名、昵称、手机号和邮箱"
-// @param role body string true "通过角色筛选老师或者学生"  Enums(student, teacher)
+// @param query body string false "模糊匹配用户名、昵称、手机号和邮箱"
+// @param role body string false "通过角色筛选老师或者学生"  Enums(student, teacher)
 // @param is_admin body int true "筛选是否是管理员，-1 不限、0 否、1 是" Enums(-1, 0, 1)
 // @param pn body int true "pn"
 // @param ps body int true "ps"
@@ -202,13 +202,13 @@ func (a Admin) UpdateUser(c iris.Context) {
 // @produce json
 // @tags admin
 // @param id body int true "用户ID"
-// @param is_admin body bool true "是否管理员"
+// @param is_admin body bool false "是否管理员"
 // @success 200 {object} swagger.Resp
 // @router /api/v1/admin/toggle-admin [post]
 func (a Admin) ToggleAdmin(c iris.Context) {
 	p := struct {
 		Id      int  `json:"id" validate:"required"`
-		IsAdmin bool `json:"is_admin" validate:"required"`
+		IsAdmin bool `json:"is_admin"`
 	}{}
 	if ok := utils.BindAndValidate(c, &p); !ok {
 		return

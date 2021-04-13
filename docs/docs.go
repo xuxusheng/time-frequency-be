@@ -183,7 +183,6 @@ var doc = `{
                         "description": "模糊匹配用户名、昵称、手机号和邮箱",
                         "name": "query",
                         "in": "body",
-                        "required": true,
                         "schema": {
                             "type": "string"
                         }
@@ -196,7 +195,6 @@ var doc = `{
                         "description": "通过角色筛选老师或者学生",
                         "name": "role",
                         "in": "body",
-                        "required": true,
                         "schema": {
                             "type": "string"
                         }
@@ -295,7 +293,6 @@ var doc = `{
                         "description": "是否管理员",
                         "name": "is_admin",
                         "in": "body",
-                        "required": true,
                         "schema": {
                             "type": "boolean"
                         }
@@ -384,10 +381,9 @@ var doc = `{
                         }
                     },
                     {
-                        "description": "密码",
+                        "description": "用户密码，留空则不修改",
                         "name": "password",
                         "in": "body",
-                        "required": true,
                         "schema": {
                             "type": "string"
                         }
