@@ -14,6 +14,7 @@ import (
 type IAdmin interface {
 	CreateUser(c iris.Context) // 创建新用户
 
+	GetUser(c iris.Context)  // 查询单个用户详细信息
 	ListUser(c iris.Context) // 查询所有用户
 
 	UpdateUser(c iris.Context)  // 修改用户信息
@@ -74,6 +75,28 @@ func (a Admin) CreateUser(c iris.Context) {
 		IsAdmin:     p.IsAdmin,
 	}
 	err := a.userSvc.Create(ctx, &user)
+	if err != nil {
+		resp.Error(cerror.ServerError.WithDebugs(err))
+		return
+	}
+	resp.Success(user)
+}
+
+// 查询单个用户详情 godoc
+// @summary 查询单个用户详情
+// @description 查询单个用户详情（供管理员使用）
+func (a Admin) GetUser(c iris.Context) {
+	p := struct {
+		Id int `json:"id" validate:"required"`
+	}{}
+	if ok := utils.BindAndValidate(c, &p); !ok {
+		return
+	}
+
+	ctx := c.Request().Context()
+	resp := response.New(c)
+
+	user, err := a.userSvc.Get(ctx, p.Id)
 	if err != nil {
 		resp.Error(cerror.ServerError.WithDebugs(err))
 		return
